@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using CleanCapture.Models;
-using Windows.Graphics.Capture;
 
 namespace CleanCapture.Services;
 
@@ -14,8 +13,12 @@ namespace CleanCapture.Services;
 /// 开始 → 暂停 → 继续 → 停止，四个状态都在这里管。
 ///
 /// 真实流程：
-/// 1. 开始：GraphicsCaptureSource 抓画面 → 一帧帧写进 FFmpeg 的标准输入；
+/// 1. 开始：GdiCaptureSource 按帧率截屏供帧 → 一帧帧写进 FFmpeg 的标准输入；
 ///    同时 SystemAudioCapture 用 NAudio 环回录系统声，写成临时 WAV。
+///    （2026-11-18 改走 GDI：原来用的 Graphics Capture + Vortice
+///    在云端编译时报 NU1101，Vortice.Windows 这个包名不存在；
+///    换包后 WinRT 接口仍有两三处核对不了，改用截图里已有的
+///    CopyFromScreen 逐帧供帧，不引新包，见 GdiCaptureSource.cs。）
 /// 2. 暂停：不再给 FFmpeg 写新帧（FFmpeg 进程先留着），计时也停表；
 ///    恢复时继续写帧。注意：暂停期间画面时间会断一下，这是 MVP 的取舍，
 ///    换来的是实现简单、不容易把 FFmpeg 写死。
@@ -30,7 +33,7 @@ public sealed class RecordingService : IDisposable
     private readonly AppSettings _settings;
     private readonly object _lock = new();
 
-    private GraphicsCaptureSource? _captureSource;
+    private GdiCaptureSource? _captureSource;
     private SystemAudioCapture? _audioCapture;
     private Process? _ffmpeg;
     private string? _ffmpegPath;
@@ -74,13 +77,11 @@ public sealed class RecordingService : IDisposable
     }
 
     /// <summary>
-    /// 开始录屏。item 是画面来源（全屏 / 某个窗口），region 是区域录屏时的矩形。
-    /// 区域录屏的做法：先抓全屏，再让 FFmpeg 按 region 裁剪——
-    /// 这里为了 MVP 简单，先只支持“全屏”和“窗口”两种 item，
-    /// 区域录屏由调用方先弹出 RegionSelectorWindow 选好矩形，
-    /// 再把矩形对应的屏幕建成 GraphicsCaptureItem 传进来（见 MainWindow）。
+    /// 开始录屏。target 是画面来源（全屏 / 某个窗口），crop 是区域录屏时的矩形。
+    /// 区域录屏的做法：先抓全屏，再让 FFmpeg 按 crop 裁剪——
+    /// 调用方先弹出 RegionSelectorWindow 选好矩形，再把全屏 target 和矩形传进来（见 MainWindow）。
     /// </summary>
-    public void Start(GraphicsCaptureItem item, System.Drawing.Rectangle? crop = null)
+    public void Start(CaptureTarget target, System.Drawing.Rectangle? crop = null)
     {
         lock (_lock)
         {
@@ -110,7 +111,7 @@ public sealed class RecordingService : IDisposable
 
             // 1. 起 FFmpeg：画面从标准输入流进来。
             var args = FFmpegService.BuildVideoArguments(
-                item.Size.Width, item.Size.Height, _settings.FrameRate, lossless, _tempVideoPath, crop);
+                target.Width, target.Height, _settings.FrameRate, lossless, _tempVideoPath, crop);
             _ffmpeg = FFmpegService.Start(_ffmpegPath, args);
 
             // 2. 起系统声（只录系统声，不开麦克风）。
@@ -129,9 +130,9 @@ public sealed class RecordingService : IDisposable
             }
 
             // 3. 起画面源：每一帧都写进 FFmpeg。
-            _captureSource = new GraphicsCaptureSource();
+            _captureSource = new GdiCaptureSource();
             _captureSource.FrameReady += OnFrameReady;
-            _captureSource.Start(item);
+            _captureSource.Start(target, _settings.FrameRate, _settings.ShowCursor);
 
             IsRecording = true;
             _isPaused = false;
