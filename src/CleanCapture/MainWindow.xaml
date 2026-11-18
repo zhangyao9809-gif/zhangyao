@@ -436,66 +436,63 @@
                         </Button>
                     </StackPanel>
                     <!--
-                      2026-11-19 再改：以前录制范围 + 两个开关挤在一行里，卡片只有约 500 宽，
-                      每组又是图标 + 两行字 + 开关，看着就挤。改成两行：
-                      上面一行只放录制范围（下拉框加宽到 180），下面一行两个开关各占一半，
-                      开关贴到各自一半的右端，中间留白。
+                      2026-11-19 彻底重排：之前两次只加间距，根子没动——
+                      开关那组是“图标 + 两行字 + 开关”竖着叠，录制范围也是 label 在上、下拉框在下，
+                      再加两行小字，内容比卡片还高，底下的字直接被截掉一半。
+                      这次全部改成单行：录制范围 label 和下拉框横着放；两个开关各占一半，
+                      每组只有“图标 + 名字 + 开关”一行，开关本身就是状态，
+                      删掉重复的“开启/关闭”那行字；底部小字缩成一句单行。
+                      卡片一下空出约 100，底下不会再截。
                     -->
-                    <StackPanel Margin="0,24,0,0">
-                        <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="录制范围" />
-                        <ComboBox x:Name="RecordScopeBox" Width="180" SelectedIndex="0" Margin="0,6,0,0" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0" VerticalAlignment="Center">
+                        <TextBlock FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="录制范围" VerticalAlignment="Center" />
+                        <ComboBox x:Name="RecordScopeBox" Width="150" SelectedIndex="0" Margin="10,0,0,0">
                             <ComboBoxItem Content="全屏" />
                             <ComboBoxItem Content="区域…" />
                             <ComboBoxItem Content="窗口…" />
                         </ComboBox>
-                        <Grid Margin="0,20,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid Grid.Column="0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
-                                           Foreground="{StaticResource TextMutedBrush}"
-                                           VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                                    <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="系统声音" />
-                                    <TextBlock x:Name="SystemAudioStateText" FontSize="13" Margin="0,4,0,0"
-                                               Foreground="{StaticResource TextPrimaryBrush}" Text="开启" />
-                                </StackPanel>
-                                <ToggleButton Grid.Column="3" x:Name="SystemAudioToggle" Style="{StaticResource SwitchToggle}"
-                                              IsChecked="True" VerticalAlignment="Center"
-                                              Checked="OnSystemAudioToggleChanged"
-                                              Unchecked="OnSystemAudioToggleChanged" />
-                            </Grid>
-                            <Grid Grid.Column="1" Margin="28,0,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
-                                           Foreground="{StaticResource TextMutedBrush}"
-                                           VerticalAlignment="Center" Margin="0,0,8,0" />
-                                <StackPanel Grid.Column="1" Margin="0,0,10,0">
-                                    <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="麦克风" />
-                                    <TextBlock x:Name="MicrophoneStateText" FontSize="13" Margin="0,4,0,0"
-                                               Foreground="{StaticResource TextPrimaryBrush}" Text="关闭" />
-                                </StackPanel>
-                                <ToggleButton Grid.Column="3" x:Name="MicrophoneToggle" Style="{StaticResource SwitchToggle}"
-                                              IsChecked="False" VerticalAlignment="Center"
-                                              Checked="OnMicrophoneToggleChanged"
-                                              Unchecked="OnMicrophoneToggleChanged" />
-                            </Grid>
-                        </Grid>
                     </StackPanel>
-                    <TextBlock x:Name="SizeHintText" Margin="0,20,0,0" FontSize="12" LineHeight="18"
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
+                                       Text="系统声音" VerticalAlignment="Center" />
+                            <ToggleButton Grid.Column="3" x:Name="SystemAudioToggle" Style="{StaticResource SwitchToggle}"
+                                          IsChecked="True" VerticalAlignment="Center"
+                                          Checked="OnSystemAudioToggleChanged"
+                                          Unchecked="OnSystemAudioToggleChanged" />
+                        </Grid>
+                        <Grid Grid.Column="1" Margin="28,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}"
+                                       Text="麦克风" VerticalAlignment="Center" />
+                            <ToggleButton Grid.Column="3" x:Name="MicrophoneToggle" Style="{StaticResource SwitchToggle}"
+                                          IsChecked="False" VerticalAlignment="Center"
+                                          Checked="OnMicrophoneToggleChanged"
+                                          Unchecked="OnMicrophoneToggleChanged" />
+                        </Grid>
+                    </Grid>
+                    <TextBlock x:Name="SizeHintText" Margin="0,18,0,0" FontSize="12" LineHeight="18"
                                Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
