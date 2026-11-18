@@ -1,0 +1,23 @@
+<Application x:Class="CleanCapture.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <!--
+      ShutdownMode 用 OnExplicitShutdown，是因为主窗口关了也不退出：
+      程序要缩到托盘里继续等快捷键。只有在托盘菜单点“退出”时才真正退出。
+      这一点在 App.xaml.cs 的 ExitApplication 里收尾。
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="Padding" Value="14,7" />
+                <Setter Property="Margin" Value="0,0,8,8" />
+                <Setter Property="MinWidth" Value="110" />
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Margin" Value="0,0,0,4" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
