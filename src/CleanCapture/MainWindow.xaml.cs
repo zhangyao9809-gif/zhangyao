@@ -71,19 +71,19 @@ public partial class MainWindow : Window
 
     private async void DoRegionScreenshot()
     {
-        var selector = new RegionSelectorWindow();
-        selector.ShowDialog();
-        if (selector.SelectedRegion is not { } region)
-        {
-            return;
-        }
-
-        // 2026-11-18：截图前先把主窗口藏起来，不然框选的区域里会拍到它自己；
-        // 藏起来要等一下（约 300ms）让画面真正消失再截，截完再回来。
+        // 2026-11-19：选区之前就先把主窗口藏起来——选区浮层是半透明的，
+        // 主窗口不藏会透出来挡住要选的画面；选完（或按 Esc 取消）再请回来。
         Hide();
         try
         {
             await System.Threading.Tasks.Task.Delay(300);
+            var selector = new RegionSelectorWindow();
+            selector.ShowDialog();
+            if (selector.SelectedRegion is not { } region)
+            {
+                return;
+            }
+
             RunSafely(() =>
             {
                 var path = _screenshots.CaptureRegion(region);
@@ -118,17 +118,17 @@ public partial class MainWindow : Window
 
     private async void DoWindowScreenshot()
     {
-        var picked = PickWindow("选一个窗口来截图");
-        if (picked == null)
-        {
-            return;
-        }
-
-        // 目标窗口可能被主窗口盖住，先藏起来再截。
+        // 同上：先藏主窗口再让用户挑窗口，不然主窗口自己会挡住目标窗口。
         Hide();
         try
         {
             await System.Threading.Tasks.Task.Delay(300);
+            var picked = PickWindow("选一个窗口来截图");
+            if (picked == null)
+            {
+                return;
+            }
+
             RunSafely(() =>
             {
                 var path = _screenshots.CaptureWindow(picked.Handle, picked.Title);
@@ -279,12 +279,22 @@ public partial class MainWindow : Window
         Rectangle? region = null;
         CaptureTarget? target = null;
 
+        // 2026-11-19：区域 / 窗口录屏选范围之前就先藏主窗口，半透明选区浮层下
+        // 主窗口会透出来挡视线；取消选择就把窗口请回来。全屏不用选范围，不用提前藏。
+        var pickedBeforeRecord = scope == "区域…" || scope == "窗口…";
+        if (pickedBeforeRecord)
+        {
+            Hide();
+            await System.Threading.Tasks.Task.Delay(300);
+        }
+
         if (scope == "区域…")
         {
             var selector = new RegionSelectorWindow();
             selector.ShowDialog();
             if (selector.SelectedRegion is not { } picked)
             {
+                ShowWindow();
                 return;
             }
 
@@ -296,6 +306,7 @@ public partial class MainWindow : Window
             var picked = PickWindow("选一个窗口来录");
             if (picked == null)
             {
+                ShowWindow();
                 return;
             }
 
@@ -313,6 +324,7 @@ public partial class MainWindow : Window
                 "CleanCapture：拿不到画面",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
+            ShowWindow();
             return;
         }
 
@@ -333,13 +345,23 @@ public partial class MainWindow : Window
             MessageBoxImage.Information);
         if (answer != MessageBoxResult.OK)
         {
+            // 点了取消不录：如果前面为了选范围已经藏了窗口，这里要请回来。
+            if (pickedBeforeRecord)
+            {
+                ShowWindow();
+            }
+
             return;
         }
 
         // 2026-11-18：开始录之前先把主窗口藏起来（等 300ms 让它彻底消失），
         // 不然录出来的视频第一帧就是 CleanCapture 自己；停录时再请回来。
-        Hide();
-        await System.Threading.Tasks.Task.Delay(300);
+        // 区域 / 窗口录屏前面选范围时已经藏过一次，就不用再藏一次。
+        if (!pickedBeforeRecord)
+        {
+            Hide();
+            await System.Threading.Tasks.Task.Delay(300);
+        }
         RunSafely(() =>
         {
             _recording.Start(target, region);
