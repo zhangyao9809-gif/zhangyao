@@ -13,11 +13,11 @@
       第三轮重构（2026-11-18）：按设计图重做高级视觉。
       Windows 11 Fluent 风格：冰蓝底、渐变主色、圆角卡片、柔和阴影。
       只改界面和少量状态同步逻辑；截图、录屏、快捷键、托盘的业务逻辑不动。
-      和设计图有两处诚实差异（设计稿第 9 条：不伪装未实现的功能）：
-      1. 没有麦克风开关：立项定死不录麦克风，这里只放“系统声音”真开关，
-         旁边写明“不录麦克风”，不画假开关。
-      2. 保留系统标准窗口边框（拖动、最大化、还原、关闭都正常），
+      和设计图有一处诚实差异（设计稿第 9 条：不伪装未实现的功能）：
+      1. 保留系统标准窗口边框（拖动、最大化、还原、关闭都正常），
          不做无边框圆角窗口；圆角体现在卡片和按钮上。
+      2. 麦克风开关是真的：2026-11-18 用户决定加上，默认关闭，
+         打开才录人声；打不开麦克风时会提示，这次只录系统声。
     -->
     <Window.Resources>
         <!-- ============ 统一主题变量 ============ -->
@@ -466,9 +466,20 @@
                                           Checked="OnSystemAudioToggleChanged"
                                           Unchecked="OnSystemAudioToggleChanged" />
                         </StackPanel>
-                        <TextBlock Grid.Column="3" FontSize="12" Margin="20,0,0,0"
-                                   Foreground="{StaticResource TextMutedBrush}"
-                                   VerticalAlignment="Center" Text="不录麦克风" />
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <StackPanel Margin="0,0,10,0">
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="麦克风" />
+                                <TextBlock x:Name="MicrophoneStateText" FontSize="13" Margin="0,4,0,0"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Text="关闭" />
+                            </StackPanel>
+                            <ToggleButton x:Name="MicrophoneToggle" Style="{StaticResource SwitchToggle}"
+                                          IsChecked="False" VerticalAlignment="Center"
+                                          Checked="OnMicrophoneToggleChanged"
+                                          Unchecked="OnMicrophoneToggleChanged" />
+                        </StackPanel>
                     </Grid>
                     <TextBlock x:Name="SizeHintText" Margin="0,16,0,0" FontSize="12"
                                Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
