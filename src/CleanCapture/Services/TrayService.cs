@@ -14,6 +14,7 @@ namespace CleanCapture.Services;
 public sealed class TrayService : IDisposable
 {
     private readonly NotifyIcon _icon;
+    private IntPtr _customHicon;
     private bool _disposed;
 
     public event Action? ShowMainWindowRequested;
@@ -27,10 +28,9 @@ public sealed class TrayService : IDisposable
     {
         _icon = new NotifyIcon
         {
-            // 没有自定义图标文件时先用系统默认图标；
-            // 之后想换图标，把 .ico 文件放进项目、设为 Resource，
-            // 再在这里改成 new Icon(.....) 即可。
-            Icon = System.Drawing.SystemIcons.Application,
+            // 托盘也用专属图标（编进程序集的 icon.png 转过来）；
+            // 读不到就回落到系统默认图标，托盘不能因为图标起不来。
+            Icon = LoadTrayIcon(),
             Text = "CleanCapture：截图录屏（自用）",
             Visible = true,
         };
@@ -49,6 +49,28 @@ public sealed class TrayService : IDisposable
         menu.Items.Add("退出", null, (_, _) => ExitRequested?.Invoke());
 
         _icon.ContextMenuStrip = menu;
+    }
+
+    /// <summary>把编进程序集的 icon.png 转成托盘用的图标。任何一步失败都回落到系统默认图标。</summary>
+    private System.Drawing.Icon LoadTrayIcon()
+    {
+        try
+        {
+            var stream = System.Windows.Application.GetResourceStream(
+                new Uri("pack://application:,,,/icon.png"))?.Stream;
+            if (stream == null)
+            {
+                return System.Drawing.SystemIcons.Application;
+            }
+
+            using var bmp = new System.Drawing.Bitmap(stream);
+            _customHicon = bmp.GetHicon();
+            return System.Drawing.Icon.FromHandle(_customHicon);
+        }
+        catch
+        {
+            return System.Drawing.SystemIcons.Application;
+        }
     }
 
     /// <summary>录制时托盘提示改一下，让用户一眼看出正在录。</summary>
@@ -74,5 +96,18 @@ public sealed class TrayService : IDisposable
         _disposed = true;
         _icon.Visible = false;
         _icon.Dispose();
+
+        // GetHicon() 造出来的句柄要自己还回去，不然每次启动都漏一个。
+        if (_customHicon != IntPtr.Zero)
+        {
+            NativeMethods.DestroyIcon(_customHicon);
+            _customHicon = IntPtr.Zero;
+        }
+    }
+
+    private static class NativeMethods
+    {
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        public static extern bool DestroyIcon(IntPtr hIcon);
     }
 }
