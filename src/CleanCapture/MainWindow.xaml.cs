@@ -45,13 +45,12 @@ public partial class MainWindow : Window
         RefreshHotkeyHint();
 
         // 系统声音开关：按保存下来的设置显示，默认开。
+        // 2026-11-19：开关本身就是状态（蓝色=开、灰色=关），不再另写一行“开启/关闭”的字。
         SystemAudioToggle.IsChecked = _settings.RecordSystemAudio;
-        UpdateSystemAudioLabel();
 
         // 麦克风开关：按保存下来的设置显示，默认关。UI 上默认也是关的，
         // 和设置里的默认值一致，不会界面上显示开、实际是关。
         MicrophoneToggle.IsChecked = _settings.RecordMicrophone;
-        UpdateMicrophoneLabel();
         Closing += (_, e) =>
         {
             // 点右上角 × 不是退出，是缩到托盘；想退出请点托盘菜单“退出”。
@@ -186,15 +185,6 @@ public partial class MainWindow : Window
 
         _settings.RecordSystemAudio = SystemAudioToggle.IsChecked == true;
         App.Settings.Save();
-        UpdateSystemAudioLabel();
-    }
-
-    private void UpdateSystemAudioLabel()
-    {
-        if (SystemAudioStateText != null && _settings != null)
-        {
-            SystemAudioStateText.Text = _settings.RecordSystemAudio ? "开启" : "关闭";
-        }
     }
 
     /// <summary>麦克风开关：真开关，默认关；打开后这次录屏会录人声。</summary>
@@ -208,15 +198,6 @@ public partial class MainWindow : Window
 
         _settings.RecordMicrophone = MicrophoneToggle.IsChecked == true;
         App.Settings.Save();
-        UpdateMicrophoneLabel();
-    }
-
-    private void UpdateMicrophoneLabel()
-    {
-        if (MicrophoneStateText != null && _settings != null)
-        {
-            MicrophoneStateText.Text = _settings.RecordMicrophone ? "开启" : "关闭";
-        }
     }
 
     /// <summary>底部状态栏：截图目录 / 录屏目录，打开实际保存文件的文件夹。</summary>
@@ -453,10 +434,12 @@ public partial class MainWindow : Window
     {
         // 预估按最终存盘的尺寸算：这里拿 1920×1080 当典型屏幕估，具体那次录多少
         // 以开始录屏时的提示为准（按实际画面尺寸算）。
+        // 2026-11-19：缩成一句话单行显示——以前是两行段落，卡片放不下，底下那行会被截掉一半。
         var (w, h) = _settings.EffectiveOutputSize(1920, 1080);
-        var (_, text) = FFmpegService.EstimateSizePerMinute(w, h, _settings.FrameRate,
+        var (mb, _) = FFmpegService.EstimateSizePerMinute(w, h, _settings.FrameRate,
             _settings.Quality == RecordingQuality.Lossless);
-        SizeHintText.Text = $"当前：{_settings.QualityDisplayName}，{_settings.FrameRate} 帧/秒，{_settings.ResolutionDisplayName}。{w}×{h} 下{text}。";
+        var quality = _settings.Quality == RecordingQuality.Lossless ? "真无损" : "高清近无损";
+        SizeHintText.Text = $"当前：{quality} · {_settings.FrameRate} 帧/秒 · {_settings.ResolutionDisplayName} · {w}×{h} 约 {mb:F0} MB/分钟";
     }
 
     /// <summary>快捷键横条：四个键帽分别显示当前生效的键，改了设置就跟着变。</summary>
