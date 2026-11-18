@@ -59,11 +59,13 @@
     <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
-    <Page Include="MainWindow.xaml" />
-    <Page Include="SettingsWindow.xaml" />
-    <Page Include="RegionSelectorWindow.xaml" />
-  </ItemGroup>
+  <!--
+    2026-11-18 第二次编译修复：原来这里显式写了
+    ApplicationDefinition / Page 包含 App.xaml、MainWindow.xaml、
+    SettingsWindow.xaml、RegionSelectorWindow.xaml，
+    但 SDK 风格的工程默认就会自动包含这些 XAML，
+    显式再写一次就报 Duplicate 'Page' items，编译失败。
+    删掉这一组，交给 SDK 默认包含即可，不用再手动列。
+  -->
 
 </Project>
