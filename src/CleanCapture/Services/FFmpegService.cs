@@ -85,6 +85,7 @@ public static class FFmpegService
     /// 输入是原始画面（rawvideo，BGRA，宽×高×帧率），从标准输入流进来；
     /// 音频另外单独录成 WAV（见 SystemAudioCapture），录完再混流，见 RecordingService。
     /// 这样做的好处：画面和声音各走各的路，任何一路出问题都不会把另一路拖死。
+    /// outputHeight：选了 1080p / 720p 时的目标高（null = 原画不缩放）。
     /// </summary>
     public static string BuildVideoArguments(
         int width,
@@ -92,7 +93,8 @@ public static class FFmpegService
         int frameRate,
         bool lossless,
         string outputPath,
-        System.Drawing.Rectangle? crop = null)
+        System.Drawing.Rectangle? crop = null,
+        int? outputHeight = null)
     {
         // -y：同名文件直接覆盖，不停下来问“要不要覆盖”。
         // -f rawvideo -pix_fmt bgra：告诉 FFmpeg，进来的就是一帧帧的原始 BGRA 画面。
@@ -100,17 +102,29 @@ public static class FFmpegService
         // GDI 位图是 32 位 ARGB，内存里的字节顺序就是 BGRA，和这里的 pix_fmt bgra 是同一套。
         var head = $"-y -f rawvideo -pix_fmt bgra -s {width}x{height} -r {frameRate} -i - ";
 
-        // 区域录屏：先抓全屏，再用 crop 裁成用户框的那一块。
-        // crop 的宽高必须是偶数（H.264 要求），这里先取整到偶数再拼进去。
-        var filter = string.Empty;
+        // 滤镜链（按顺序拼，用逗号连成一个 -vf）：
+        // 1. 区域录屏：先抓全屏，再用 crop 裁成用户框的那一块。
+        //    crop 的宽高必须是偶数（H.264 要求），这里先取整到偶数再拼进去。
+        // 2. 分辨率档：选了 1080p / 720p 且画面比它高时，再用 scale 缩小。
+        //    scale=-2:高：宽按比例自动算，-2 保证宽是偶数；画面本来就比目标矮时不缩。
+        var filters = new System.Collections.Generic.List<string>();
+        var effectiveHeight = height;
         if (crop is { Width: > 0, Height: > 0 })
         {
             var w = crop.Value.Width / 2 * 2;
             var h = crop.Value.Height / 2 * 2;
             var x = crop.Value.X / 2 * 2;
             var y = crop.Value.Y / 2 * 2;
-            filter = $" -vf crop={w}:{h}:{x}:{y} ";
+            filters.Add($"crop={w}:{h}:{x}:{y}");
+            effectiveHeight = h;
         }
+
+        if (outputHeight is { } target && effectiveHeight > target)
+        {
+            filters.Add($"scale=-2:{target}");
+        }
+
+        var filter = filters.Count == 0 ? string.Empty : $" -vf \"{string.Join(",", filters)}\" ";
 
         string codecPart;
         if (lossless)
