@@ -35,7 +35,7 @@ public partial class RegionSelectorWindow : Window
         };
     }
 
-    private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    private void OnMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         _startPoint = e.GetPosition(RootCanvas);
         _dragging = true;
@@ -44,7 +44,7 @@ public partial class RegionSelectorWindow : Window
         CaptureMouse();
     }
 
-    private void OnMouseMove(object sender, MouseEventArgs e)
+    private void OnMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
     {
         if (!_dragging)
         {
@@ -70,7 +70,7 @@ public partial class RegionSelectorWindow : Window
         System.Windows.Controls.Canvas.SetTop(SizeText, top + height + 8);
     }
 
-    private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    private void OnMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (!_dragging)
         {
