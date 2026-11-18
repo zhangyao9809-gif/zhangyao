@@ -3,73 +3,81 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="CleanCapture — 截图录屏（自用）"
         Icon="icon.ico"
-        Width="520" Height="540"
-        ResizeMode="CanMinimize"
+        Width="1160" Height="740"
+        MinWidth="1020" MinHeight="660"
+        ResizeMode="CanResize"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PageBackground}">
     <!--
-      第二轮打磨（2026-11-18）：往“收费软件”的精致感走。
-      渐变标题带、圆角阴影卡片、渐变主按钮、Segoe MDL2 Assets 字形。
-      只改样式，不改功能。所有 x:Name、Click 事件、Grid.Row 和控件顺序都和原来一样。
-      注意：RecordButton / PauseButton 的文字会在代码里被改成“停止录屏”/“继续”，
-      改成纯文字后字形就没了，这是正常的，不会报错。
+      第三轮重构（2026-11-18）：按设计图重做高级视觉。
+      Windows 11 Fluent 风格：冰蓝底、渐变主色、圆角卡片、柔和阴影。
+      只改界面和少量状态同步逻辑；截图、录屏、快捷键、托盘的业务逻辑不动。
+      和设计图有两处诚实差异（设计稿第 9 条：不伪装未实现的功能）：
+      1. 没有麦克风开关：立项定死不录麦克风，这里只放“系统声音”真开关，
+         旁边写明“不录麦克风”，不画假开关。
+      2. 保留系统标准窗口边框（拖动、最大化、还原、关闭都正常），
+         不做无边框圆角窗口；圆角体现在卡片和按钮上。
     -->
     <Window.Resources>
-        <!-- 配色 -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#0E9A8B" />
-        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#0B7D72" />
-        <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#09685E" />
-        <SolidColorBrush x:Key="DeepBlueBrush" Color="#14557A" />
-        <SolidColorBrush x:Key="PageBackground" Color="#F8FAFB" />
+        <!-- ============ 统一主题变量 ============ -->
+        <SolidColorBrush x:Key="PageBackground" Color="#F2F7FF" />
         <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="CardBorderBrush" Color="#DFE7EB" />
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1F2A33" />
-        <SolidColorBrush x:Key="TextMutedBrush" Color="#6B7A85" />
-        <SolidColorBrush x:Key="ButtonBorderBrush" Color="#CBD6DC" />
-        <SolidColorBrush x:Key="ButtonHoverBrush" Color="#EFF5F6" />
-        <SolidColorBrush x:Key="ButtonPressedBrush" Color="#E3ECEE" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#DCE8F7" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#102448" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#657FA5" />
+        <SolidColorBrush x:Key="AccentBlueBrush" Color="#0875F5" />
+        <SolidColorBrush x:Key="TealBrush" Color="#00CFAE" />
+        <SolidColorBrush x:Key="ButtonBorderBrush" Color="#D6E4F5" />
+        <SolidColorBrush x:Key="ButtonHoverBrush" Color="#F2F8FF" />
+        <SolidColorBrush x:Key="ButtonPressedBrush" Color="#E6F0FD" />
         <SolidColorBrush x:Key="ButtonDisabledBrush" Color="#F2F4F5" />
         <SolidColorBrush x:Key="TextDisabledBrush" Color="#9AA7AF" />
-        <SolidColorBrush x:Key="HintPanelBrush" Color="#EFF5F6" />
-        <SolidColorBrush x:Key="FooterBrush" Color="#EFF4F6" />
-        <!-- 标题带和主按钮共用的青→深蓝渐变（取自专属图标） -->
-        <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#0E9A8B" Offset="0" />
-            <GradientStop Color="#0B7D8A" Offset="0.55" />
-            <GradientStop Color="#14557A" Offset="1" />
-        </LinearGradientBrush>
+        <SolidColorBrush x:Key="KeycapBackground" Color="#EAF3FF" />
+        <SolidColorBrush x:Key="KeycapBorderBrush" Color="#C9DFF7" />
+        <SolidColorBrush x:Key="StatusBarBrush" Color="#EAF3FF" />
+        <SolidColorBrush x:Key="OkGreenBrush" Color="#22C55E" />
+        <!-- 主色渐变：#00CFAE → #0875F5（设计稿） -->
         <LinearGradientBrush x:Key="PrimaryGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#0E9A8B" Offset="0" />
-            <GradientStop Color="#14557A" Offset="1" />
+            <GradientStop Color="#00CFAE" Offset="0" />
+            <GradientStop Color="#0875F5" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="PrimaryHoverGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#0B8A7B" Offset="0" />
-            <GradientStop Color="#0F4A68" Offset="1" />
+            <GradientStop Color="#00BFA0" Offset="0" />
+            <GradientStop Color="#0668DD" Offset="1" />
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="PrimaryPressedGradientBrush" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#09685E" Offset="0" />
-            <GradientStop Color="#0D3F5C" Offset="1" />
+            <GradientStop Color="#00A98D" Offset="0" />
+            <GradientStop Color="#0559C4" Offset="1" />
+        </LinearGradientBrush>
+        <!-- 标题带：极淡的冰蓝磨砂渐变 -->
+        <LinearGradientBrush x:Key="HeaderBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#EAF4FF" Offset="0" />
+            <GradientStop Color="#E4F7F1" Offset="0.55" />
+            <GradientStop Color="#E8F1FF" Offset="1" />
+        </LinearGradientBrush>
+        <!-- 卡片标题小图标底色 -->
+        <LinearGradientBrush x:Key="ShotTileBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#34D399" Offset="0" />
+            <GradientStop Color="#00CFAE" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="RecordTileBrush" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#60A5FA" Offset="0" />
+            <GradientStop Color="#0875F5" Offset="1" />
         </LinearGradientBrush>
 
-        <!--
-          两个按钮模板分开写，不共用：
-          模板里的 Trigger 优先级高于 Style 里的 Trigger，
-          如果主按钮只靠 Style.Trigger 改悬停色，会被模板的
-          悬停 Trigger 盖掉（白字 + 浅底，看不清）。所以主按钮
-          有自己的一套模板，悬停/按下颜色写死在模板里。
-        -->
+        <!-- ============ 按钮模板 ============ -->
+        <!-- 普通按钮模板：白底、细边框、圆角 8，悬停描边变蓝 -->
         <ControlTemplate x:Key="CleanButtonTemplate" TargetType="Button">
             <Border Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
                     CornerRadius="8">
-                <ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center" />
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{StaticResource ButtonHoverBrush}" />
-                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}" />
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
                     <Setter Property="Background" Value="{StaticResource ButtonPressedBrush}" />
@@ -82,17 +90,17 @@
             </ControlTemplate.Triggers>
         </ControlTemplate>
 
+        <!-- 主按钮模板：渐变底、白字、柔和阴影 -->
         <ControlTemplate x:Key="PrimaryButtonTemplate" TargetType="Button">
             <Border Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="8">
+                    CornerRadius="14">
                 <Border.Effect>
-                    <DropShadowEffect BlurRadius="6" ShadowDepth="1" Direction="270"
-                                      Opacity="0.25" Color="#14557A" />
+                    <DropShadowEffect BlurRadius="12" ShadowDepth="4" Direction="270"
+                                      Opacity="0.25" Color="#0875F5" />
                 </Border.Effect>
-                <ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center" />
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -111,37 +119,63 @@
             </ControlTemplate.Triggers>
         </ControlTemplate>
 
-        <!-- 卡片模板：白底圆角 + 细腻阴影，标题上方一条青色小横线点缀 -->
-        <ControlTemplate x:Key="CardGroupBoxTemplate" TargetType="GroupBox">
+        <!-- 截图大按钮模板：白底、圆角 16、悬停提亮描边 -->
+        <ControlTemplate x:Key="ShotButtonTemplate" TargetType="Button">
             <Border Background="{TemplateBinding Background}"
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="10"
-                    Padding="{TemplateBinding Padding}">
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="8" ShadowDepth="1" Direction="270"
-                                      Opacity="0.12" Color="#1F2A33" />
-                </Border.Effect>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <StackPanel Margin="0,0,0,10">
-                        <Rectangle Width="26" Height="3" Fill="{StaticResource PrimaryBrush}"
-                                   RadiusX="1.5" RadiusY="1.5"
-                                   HorizontalAlignment="Left" Margin="0,0,0,6" />
-                        <ContentPresenter ContentSource="Header"
-                                          TextBlock.FontWeight="Bold"
-                                          TextBlock.FontSize="13"
-                                          TextBlock.Foreground="{StaticResource DeepBlueBrush}" />
-                    </StackPanel>
-                    <ContentPresenter Grid.Row="1" />
-                </Grid>
+                    CornerRadius="16">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBlueBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonPressedBrush}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
         </ControlTemplate>
 
-        <!-- 普通按钮：白底、细边框、8px 圆角 -->
+        <!-- 开关模板：滑动小圆点，150ms 平滑移动 -->
+        <ControlTemplate x:Key="SwitchTemplate" TargetType="ToggleButton">
+            <Border x:Name="Track" Background="#CBD8EA" CornerRadius="12"
+                    Width="46" Height="24">
+                <Ellipse x:Name="Thumb" Width="18" Height="18" Fill="#FFFFFF"
+                         HorizontalAlignment="Left" Margin="3,0,0,0">
+                    <Ellipse.Effect>
+                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Direction="270"
+                                          Opacity="0.25" Color="#102448" />
+                    </Ellipse.Effect>
+                </Ellipse>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter TargetName="Track" Property="Background" Value="{StaticResource AccentBlueBrush}" />
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ThicknessAnimation Storyboard.TargetName="Thumb"
+                                                    Storyboard.TargetProperty="Margin"
+                                                    To="25,0,0,0" Duration="0:0:0.15" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <ThicknessAnimation Storyboard.TargetName="Thumb"
+                                                    Storyboard.TargetProperty="Margin"
+                                                    To="3,0,0,0" Duration="0:0:0.15" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- ============ 按钮样式 ============ -->
         <Style x:Key="CleanButton" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource CardBackground}" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
@@ -151,166 +185,414 @@
             <Setter Property="MinWidth" Value="96" />
             <Setter Property="MinHeight" Value="34" />
             <Setter Property="FontSize" Value="13" />
-            <Setter Property="FontWeight" Value="Normal" />
-            <Setter Property="Margin" Value="0,0,8,8" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template" Value="{StaticResource CleanButtonTemplate}" />
         </Style>
 
-        <!-- 主操作按钮：青→深蓝渐变底、白字（只给“开始录屏”用） -->
+        <!-- 小号文字按钮（底部状态栏用） -->
+        <Style x:Key="ToolButton" TargetType="Button" BasedOn="{StaticResource CleanButton}">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+
         <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource CleanButton}">
             <Setter Property="Background" Value="{StaticResource PrimaryGradientBrush}" />
             <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="BorderBrush" Value="{StaticResource PrimaryGradientBrush}" />
             <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="MinHeight" Value="58" />
+            <Setter Property="Padding" Value="28,0" />
             <Setter Property="Template" Value="{StaticResource PrimaryButtonTemplate}" />
         </Style>
 
-        <!-- 分组卡片：白底卡片、浅边框、圆角阴影模板 -->
-        <Style TargetType="GroupBox">
+        <!-- 截图大按钮：纵向图标+名称+说明 -->
+        <Style x:Key="ShotButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CardBackground}" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="MinHeight" Value="128" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template" Value="{StaticResource ShotButtonTemplate}" />
+        </Style>
+
+        <!-- 录屏暂停/停止：跟开始录屏同高 58，白底 -->
+        <Style x:Key="RecordSideButton" TargetType="Button" BasedOn="{StaticResource CleanButton}">
+            <Setter Property="MinHeight" Value="58" />
+            <Setter Property="MinWidth" Value="104" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+
+        <!-- 系统声音开关 -->
+        <Style x:Key="SwitchToggle" TargetType="ToggleButton">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template" Value="{StaticResource SwitchTemplate}" />
+        </Style>
+
+        <!-- 卡片：白底、圆角 20、1px 浅蓝描边、柔和阴影 -->
+        <Style x:Key="CardBorder" TargetType="Border">
             <Setter Property="Background" Value="{StaticResource CardBackground}" />
             <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="16,12,16,10" />
-            <Setter Property="FontSize" Value="13" />
-            <Setter Property="Template" Value="{StaticResource CardGroupBoxTemplate}" />
+            <Setter Property="CornerRadius" Value="20" />
+            <Setter Property="Padding" Value="24" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="8" Direction="270"
+                                      Opacity="0.10" Color="#2659A0" />
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- 下拉框：跟按钮同高，白底 -->
+        <!-- 下拉框 -->
         <Style TargetType="ComboBox">
-            <Setter Property="MinHeight" Value="34" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             <Setter Property="Background" Value="{StaticResource CardBackground}" />
             <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
+
+        <!-- 录制红点呼吸动画：录制中循环淡入淡出 -->
+        <Storyboard x:Key="RecDotPulse" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="1" To="0.3" Duration="0:0:0.6"
+                             AutoReverse="True" />
+        </Storyboard>
     </Window.Resources>
 
-    <Grid Margin="24,20,24,20">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="110" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- 渐变标题带背景：贴到窗口三边，下方圆角收边；标题文字浮在上面 -->
-        <Border Grid.Row="0" Grid.RowSpan="2"
-                Background="{StaticResource HeaderGradientBrush}"
-                Margin="-24,-20,-24,0" CornerRadius="8,8,12,12" />
-
-        <!-- 标题：图标 + 名字（白字，浮在渐变带上） -->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
-            <Image Source="icon.png" Width="40" Height="40" Margin="0,0,12,0" />
-            <TextBlock FontSize="22" FontWeight="Bold" Foreground="#FFFFFF"
-                       VerticalAlignment="Center" Text="CleanCapture" />
-        </StackPanel>
-        <TextBlock Grid.Row="1" Margin="0,6,0,14" FontSize="13"
-                   Foreground="#D6EAF2" TextWrapping="Wrap"
-                   Text="自用小工具：截图 PNG 无损，录屏分真无损 / 高清两档，只录系统声，不录麦克风。" />
-
-        <GroupBox Grid.Row="2" Header="截图" Margin="0,14,0,0">
-            <StackPanel Orientation="Horizontal">
-                <Button x:Name="RegionShotButton" Style="{StaticResource CleanButton}"
-                        Click="OnRegionShotClick">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A8;" FontSize="14"
-                                   Margin="0,0,6,0" VerticalAlignment="Center" />
-                        <TextBlock Text="区域截图" VerticalAlignment="Center" />
+        <!-- ================= 顶部标题栏 ================= -->
+        <Border Grid.Row="0" Background="{StaticResource HeaderBrush}"
+                BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="28,0,28,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Source="icon.png" Width="64" Height="64" Margin="0,0,16,0" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock FontSize="30" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Text="CleanCapture" />
+                        <TextBlock FontSize="14" Margin="0,4,0,0"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   Text="专业的截图与录屏工具" />
                     </StackPanel>
-                </Button>
-                <Button x:Name="FullscreenShotButton" Style="{StaticResource CleanButton}"
-                        Click="OnFullscreenShotClick">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE722;" FontSize="14"
-                                   Margin="0,0,6,0" VerticalAlignment="Center" />
-                        <TextBlock Text="全屏截图" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button x:Name="WindowShotButton" Style="{StaticResource CleanButton}"
-                        Click="OnWindowShotClick">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A7;" FontSize="14"
-                                   Margin="0,0,6,0" VerticalAlignment="Center" />
-                        <TextBlock Text="窗口截图…" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-        </GroupBox>
-
-        <GroupBox Grid.Row="3" Header="录屏" Margin="0,10,0,0">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="RecordButton" Style="{StaticResource PrimaryButton}"
-                            Click="OnRecordClick">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7C8;" FontSize="14"
-                                       Margin="0,0,6,0" VerticalAlignment="Center" />
-                            <TextBlock Text="开始录屏" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="PauseButton" Style="{StaticResource CleanButton}"
-                            IsEnabled="False" Click="OnPauseClick">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE769;" FontSize="14"
-                                       Margin="0,0,6,0" VerticalAlignment="Center" />
-                            <TextBlock Text="暂停" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <ComboBox x:Name="RecordScopeBox" Width="130" Margin="0,0,8,8" SelectedIndex="0">
-                        <ComboBoxItem Content="全屏" />
-                        <ComboBoxItem Content="区域…" />
-                        <ComboBoxItem Content="窗口…" />
-                    </ComboBox>
+                    <Border Margin="20,0,0,0" Padding="14,7" CornerRadius="16"
+                            Background="#FFFFFF" BorderBrush="{StaticResource CardBorderBrush}"
+                            BorderThickness="1" VerticalAlignment="Center">
+                        <TextBlock FontSize="13" Foreground="{StaticResource TextMutedBrush}">
+                            <Run FontFamily="Segoe MDL2 Assets" Text="&#xE7B8; " Foreground="{StaticResource AccentBlueBrush}" /><Run Text="轻量 · 高清 · 高效" />
+                        </TextBlock>
+                    </Border>
                 </StackPanel>
-                <TextBlock x:Name="StatusText" Margin="0,4,0,0" FontSize="13"
-                           FontWeight="SemiBold" Foreground="{StaticResource DeepBlueBrush}"
-                           Text="未在录制" />
-                <TextBlock x:Name="SizeHintText" Margin="0,4,0,0" FontSize="12"
-                           Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
-            </StackPanel>
-        </GroupBox>
+                <Button Grid.Column="2" Style="{StaticResource CleanButton}"
+                        MinWidth="44" MinHeight="44" Padding="0" CornerRadius="10"
+                        Click="OnSettingsClick" ToolTip="设置">
+                    <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="20"
+                               VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </Button>
+            </Grid>
+        </Border>
 
-        <!-- 快捷键卡片：显示当前生效的四个键（设置里改了，这里跟着变），
-             不是写死的文字。想自己改：点下面“设置…”→ 快捷键。 -->
-        <GroupBox Grid.Row="4" Header="快捷键" Margin="0,10,0,0">
-            <StackPanel>
-                <Border Background="{StaticResource HintPanelBrush}" CornerRadius="6" Padding="10,8">
-                    <TextBlock x:Name="HotkeyHintText" FontSize="13" FontWeight="Normal"
-                               Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap" />
-                </Border>
-                <TextBlock Margin="0,8,0,0" FontSize="12"
-                           Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap"
-                           Text="想自己改：点下面“设置…”→ 快捷键，点一下框、按新组合键就行，保存后马上生效。" />
-            </StackPanel>
-        </GroupBox>
+        <!-- ================= 中部双卡片 ================= -->
+        <Grid Grid.Row="1" Margin="28,20,28,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <!-- 底部状态条：浅色横条贴到底边，左侧版本信息，右侧两个按钮 -->
-        <Border Grid.Row="5" Background="{StaticResource FooterBrush}"
+            <!-- 截图卡片 -->
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,10,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="56" Height="56" CornerRadius="16"
+                                Background="{StaticResource ShotTileBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A8;"
+                                       FontSize="28" Foreground="#FFFFFF"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock FontSize="22" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}" Text="截图" />
+                            <TextBlock FontSize="14" Margin="0,4,0,0"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="快速捕捉屏幕精彩内容" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Grid Margin="0,24,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" x:Name="RegionShotButton" Style="{StaticResource ShotButton}"
+                                Margin="0,0,6,0" Click="OnRegionShotClick">
+                            <StackPanel>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7A8;" FontSize="30"
+                                           Foreground="{StaticResource AccentBlueBrush}"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock FontSize="15" FontWeight="SemiBold" Margin="0,12,0,0"
+                                           HorizontalAlignment="Center" Text="区域截图" />
+                                <TextBlock FontSize="12" Margin="0,4,0,0"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center" Text="自定义区域" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" x:Name="FullscreenShotButton" Style="{StaticResource ShotButton}"
+                                Margin="6,0,6,0" Click="OnFullscreenShotClick">
+                            <StackPanel>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE722;" FontSize="30"
+                                           Foreground="{StaticResource AccentBlueBrush}"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock FontSize="15" FontWeight="SemiBold" Margin="0,12,0,0"
+                                           HorizontalAlignment="Center" Text="全屏截图" />
+                                <TextBlock FontSize="12" Margin="0,4,0,0"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center" Text="截取整个屏幕" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" x:Name="WindowShotButton" Style="{StaticResource ShotButton}"
+                                Margin="6,0,0,0" Click="OnWindowShotClick">
+                            <StackPanel>
+                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8A7;" FontSize="30"
+                                           Foreground="{StaticResource AccentBlueBrush}"
+                                           HorizontalAlignment="Center" />
+                                <TextBlock FontSize="15" FontWeight="SemiBold" Margin="0,12,0,0"
+                                           HorizontalAlignment="Center" Text="窗口截图" />
+                                <TextBlock FontSize="12" Margin="0,4,0,0"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           HorizontalAlignment="Center" Text="截取指定窗口" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 录屏卡片 -->
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="10,0,0,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="56" Height="56" CornerRadius="16"
+                                Background="{StaticResource RecordTileBrush}">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE714;"
+                                       FontSize="28" Foreground="#FFFFFF"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                            <TextBlock FontSize="22" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}" Text="录屏" />
+                            <TextBlock FontSize="14" Margin="0,4,0,0"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Text="高清录制屏幕操作与声音" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,24,0,0">
+                        <Button x:Name="RecordButton" Style="{StaticResource PrimaryButton}"
+                                Click="OnRecordClick">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="14" Height="14" Fill="#FF3B30" Stroke="#FFFFFF"
+                                         StrokeThickness="2" Margin="0,0,10,0"
+                                         VerticalAlignment="Center" />
+                                <TextBlock Text="开始录屏" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="PauseButton" Style="{StaticResource RecordSideButton}"
+                                IsEnabled="False" Click="OnPauseClick">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE769;" FontSize="15"
+                                           Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="PauseButtonText" Text="暂停" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="StopButton" Style="{StaticResource RecordSideButton}"
+                                IsEnabled="False" Click="OnStopClick" Margin="0,0,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE7C8;" FontSize="15"
+                                           Margin="0,0,6,0" VerticalAlignment="Center" />
+                                <TextBlock Text="停止" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel>
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="录制范围" />
+                                <ComboBox x:Name="RecordScopeBox" Width="120" SelectedIndex="0" Margin="0,4,0,0">
+                                    <ComboBoxItem Content="全屏" />
+                                    <ComboBoxItem Content="区域…" />
+                                    <ComboBoxItem Content="窗口…" />
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <StackPanel Margin="0,0,10,0">
+                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="系统声音" />
+                                <TextBlock x:Name="SystemAudioStateText" FontSize="13" Margin="0,4,0,0"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Text="开启" />
+                            </StackPanel>
+                            <ToggleButton x:Name="SystemAudioToggle" Style="{StaticResource SwitchToggle}"
+                                          IsChecked="True" VerticalAlignment="Center"
+                                          Checked="OnSystemAudioToggleChanged"
+                                          Unchecked="OnSystemAudioToggleChanged" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="3" FontSize="12" Margin="20,0,0,0"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   VerticalAlignment="Center" Text="不录麦克风" />
+                    </Grid>
+                    <TextBlock x:Name="SizeHintText" Margin="0,16,0,0" FontSize="12"
+                               Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= 快捷键横条 ================= -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorder}" Margin="28,20,28,0" Padding="24,18">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="48" Height="48" CornerRadius="14"
+                            Background="{StaticResource KeycapBackground}">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE765;"
+                                   FontSize="24" Foreground="{StaticResource AccentBlueBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                        <TextBlock FontSize="18" FontWeight="Bold"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Text="快捷键" />
+                        <TextBlock FontSize="12" Margin="0,2,0,0"
+                                   Foreground="{StaticResource TextMutedBrush}"
+                                   Text="高效操作，一键直达" />
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <Border Background="{StaticResource KeycapBackground}"
+                                BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="10,6">
+                            <TextBlock x:Name="HotkeyRegionText" FontFamily="Consolas" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}" />
+                        </Border>
+                        <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Text="区域截图" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <Border Background="{StaticResource KeycapBackground}"
+                                BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="10,6">
+                            <TextBlock x:Name="HotkeyFullscreenText" FontFamily="Consolas" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}" />
+                        </Border>
+                        <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Text="全屏截图" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                        <Border Background="{StaticResource KeycapBackground}"
+                                BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="10,6">
+                            <TextBlock x:Name="HotkeyRecordText" FontFamily="Consolas" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}" />
+                        </Border>
+                        <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Text="开始/停止录屏" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Background="{StaticResource KeycapBackground}"
+                                BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
+                                CornerRadius="8" Padding="10,6">
+                            <TextBlock x:Name="HotkeyPauseText" FontFamily="Consolas" FontSize="13"
+                                       FontWeight="SemiBold" Foreground="{StaticResource AccentBlueBrush}" />
+                        </Border>
+                        <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextPrimaryBrush}" Text="暂停录屏" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ================= 底部状态栏 ================= -->
+        <Border Grid.Row="3" Background="{StaticResource StatusBarBrush}"
                 BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0"
-                Margin="-24,10,-24,-20" Padding="24,10,24,10" CornerRadius="12,12,0,0">
+                Margin="0,20,0,0" Padding="28,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center" FontSize="11"
-                           Foreground="{StaticResource TextMutedBrush}"
-                           Text="CleanCapture v0.1 · 截图 PNG 无损 · 只录系统声" />
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <Button Style="{StaticResource CleanButton}" Margin="0,0,8,0"
-                            Click="OnSettingsClick">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="22" Height="22" CornerRadius="11"
+                            Background="{StaticResource OkGreenBrush}">
+                        <TextBlock Text="✓" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Ellipse x:Name="RecDot" Width="12" Height="12" Fill="#FF3B30"
+                             Margin="10,0,0,0" VerticalAlignment="Center" Visibility="Collapsed" />
+                    <TextBlock x:Name="StatusText" FontSize="14" FontWeight="SemiBold" Margin="10,0,0,0"
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"
+                               Text="就绪 · 可随时截图或录屏" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ToolButton}" Click="OnOpenShotFolderClick">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE8B7;" FontSize="14"
+                                       Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="截图目录" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ToolButton}" Click="OnOpenRecordFolderClick">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE714;" FontSize="14"
+                                       Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="录屏目录" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource ToolButton}" Click="OnSettingsClick">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE713;" FontSize="14"
                                        Margin="0,0,6,0" VerticalAlignment="Center" />
-                            <TextBlock Text="设置…" VerticalAlignment="Center" />
+                            <TextBlock Text="设置" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Style="{StaticResource CleanButton}" Margin="0,0,0,0"
-                            Content="最小化到托盘" Click="OnMinimizeToTrayClick" />
+                    <Button Style="{StaticResource ToolButton}" Margin="0,0,0,0"
+                            Click="OnMinimizeToTrayClick">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE769;" FontSize="14"
+                                       Margin="0,0,6,0" VerticalAlignment="Center" />
+                            <TextBlock Text="最小化到托盘" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
