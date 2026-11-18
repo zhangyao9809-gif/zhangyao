@@ -12,11 +12,12 @@ namespace CleanCapture.Services;
 /// 原理是向 Windows 注册热键（RegisterHotKey），系统收到后会发一条
 /// WM_HOTKEY 消息给我们，我们在消息里判断是哪个键，再去截图 / 录屏。
 ///
-/// 默认键（设置窗口里可以改）：
-/// * 区域截图 Ctrl+Shift+S
-/// * 全屏截图 Ctrl+Shift+F
-/// * 开始 / 停止录屏 Ctrl+Shift+R
-/// * 暂停 / 继续录屏 Ctrl+Shift+P
+/// 默认键（设置窗口里可以改），2026-11-18 从 Ctrl+Shift 改成 Ctrl+Alt，
+/// 因为 Ctrl+Shift+S 在用户电脑上已被别的软件占用（注册失败 1409）：
+/// * 区域截图 Ctrl+Alt+S
+/// * 全屏截图 Ctrl+Alt+F
+/// * 开始 / 停止录屏 Ctrl+Alt+R
+/// * 暂停 / 继续录屏 Ctrl+Alt+P
 /// 故意避开微信 Alt+A、QQ Ctrl+Alt+A；如果还是冲突（比如别的软件也占了），
 /// 注册时会失败，程序会弹一次提示让你换个键，不要硬抢。
 /// </summary>
@@ -56,7 +57,7 @@ public sealed class HotkeyService : IDisposable
         if (!TryParse(hotkeyText, out var modifiers, out var key))
         {
             System.Windows.MessageBox.Show(
-                $"快捷键“{hotkeyText}”写错了，{actionName} 这次没注册上。\n请去设置里改成像 Ctrl+Shift+S 这样的写法。",
+                $"快捷键“{hotkeyText}”写错了，{actionName} 这次没注册上。\n请去设置里改成像 Ctrl+Alt+S 这样的写法。",
                 "CleanCapture：快捷键写错了",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -70,7 +71,7 @@ public sealed class HotkeyService : IDisposable
             var error = Marshal.GetLastWin32Error();
             System.Windows.MessageBox.Show(
                 $"快捷键“{hotkeyText}”注册失败（错误码 {error}），很可能被别的软件占了。\n" +
-                "请去设置里换一个组合键，比如把 Ctrl+Shift+S 换成 Ctrl+Alt+S。",
+                "请去设置里换一个组合键，比如把 Ctrl+Alt+S 换成 Ctrl+Alt+Shift+S。",
                 "CleanCapture：快捷键被占了",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
