@@ -21,7 +21,7 @@
     -->
     <Window.Resources>
         <!-- ============ 统一主题变量 ============ -->
-        <SolidColorBrush x:Key="PageBackground" Color="#F2F7FF" />
+        <!-- 注意：PageBackground 不在这里定义，见 App.xaml（窗口标签自己的属性求值时还看不到这里）。 -->
         <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF" />
         <SolidColorBrush x:Key="CardBorderBrush" Color="#DCE8F7" />
         <SolidColorBrush x:Key="TextPrimaryBrush" Color="#102448" />
