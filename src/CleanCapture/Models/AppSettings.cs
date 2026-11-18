@@ -30,8 +30,8 @@ public enum RecordingResolution
 /// <summary>
 /// 全部设置都存在这里。文件位置见 SettingsService：
 /// 程序旁边的 CleanCapture.settings.json，绿色版、换电脑直接拷走。
-/// 注意：这里故意没有“开机自启”和“麦克风”两个开关，
-/// 立项时已经定死：开机不自启、只录系统声、不录麦克风。
+/// 注意：这里故意没有“开机自启”开关，立项时已经定死：开机不自启。
+/// 麦克风开关 2026-11-18 加上：用户决定要，默认关闭，打开才录人声。
 /// </summary>
 public sealed class AppSettings
 {
@@ -50,9 +50,14 @@ public sealed class AppSettings
 
     /// <summary>
     /// 系统声音开关：默认开。主窗口的“系统声音”开关可以关掉它（这次录屏就没声音）。
-    /// 麦克风永远不录：没有麦克风开关，立项时定死的。
     /// </summary>
     public bool RecordSystemAudio { get; set; } = true;
+
+    /// <summary>
+    /// 麦克风开关：默认关。2026-11-18 用户决定加上，UI 上默认也是关的；
+    /// 打开后才录人声，和系统声混成一路。关着时录出来和以前一样，只有系统声。
+    /// </summary>
+    public bool RecordMicrophone { get; set; } = false;
 
     /// <summary>录屏时是否录鼠标光标。默认录，方便看操作。</summary>
     public bool ShowCursor { get; set; } = true;
