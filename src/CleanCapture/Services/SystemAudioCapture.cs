@@ -5,8 +5,9 @@ using NAudio.Wave;
 namespace CleanCapture.Services;
 
 /// <summary>
-/// 系统声采集：只录电脑里正在放的声音（比如视频、会议、游戏的声音），
-/// 不录麦克风。这是立项时定死的，代码里也没有任何地方会去开麦克风。
+/// 系统声采集：只录电脑里正在放的声音（比如视频、会议、游戏的声音）。
+/// 麦克风是另一路（MicrophoneCapture），默认关闭，打开才录人声，
+/// 录完两路声音由 FFmpeg 混成一路。
 ///
 /// 原理（通俗版）：Windows 有个“环回”接口，相当于在声卡出口处接一根线，
 /// 把要进音箱的声音抄一份下来。NAudio 的 WasapiLoopbackCapture 就是干这个的。
