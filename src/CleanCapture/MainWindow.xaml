@@ -435,52 +435,66 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                    <Grid Margin="0,24,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                            <StackPanel>
-                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="录制范围" />
-                                <ComboBox x:Name="RecordScopeBox" Width="120" SelectedIndex="0" Margin="0,4,0,0">
-                                    <ComboBoxItem Content="全屏" />
-                                    <ComboBoxItem Content="区域…" />
-                                    <ComboBoxItem Content="窗口…" />
-                                </ComboBox>
-                            </StackPanel>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
-                                       Foreground="{StaticResource TextMutedBrush}"
-                                       VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <StackPanel Margin="0,0,10,0">
-                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="系统声音" />
-                                <TextBlock x:Name="SystemAudioStateText" FontSize="13" Margin="0,4,0,0"
-                                           Foreground="{StaticResource TextPrimaryBrush}" Text="开启" />
-                            </StackPanel>
-                            <ToggleButton x:Name="SystemAudioToggle" Style="{StaticResource SwitchToggle}"
-                                          IsChecked="True" VerticalAlignment="Center"
-                                          Checked="OnSystemAudioToggleChanged"
-                                          Unchecked="OnSystemAudioToggleChanged" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
-                            <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
-                                       Foreground="{StaticResource TextMutedBrush}"
-                                       VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <StackPanel Margin="0,0,10,0">
-                                <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="麦克风" />
-                                <TextBlock x:Name="MicrophoneStateText" FontSize="13" Margin="0,4,0,0"
-                                           Foreground="{StaticResource TextPrimaryBrush}" Text="关闭" />
-                            </StackPanel>
-                            <ToggleButton x:Name="MicrophoneToggle" Style="{StaticResource SwitchToggle}"
-                                          IsChecked="False" VerticalAlignment="Center"
-                                          Checked="OnMicrophoneToggleChanged"
-                                          Unchecked="OnMicrophoneToggleChanged" />
-                        </StackPanel>
-                    </Grid>
+                    <!--
+                      2026-11-19 再改：以前录制范围 + 两个开关挤在一行里，卡片只有约 500 宽，
+                      每组又是图标 + 两行字 + 开关，看着就挤。改成两行：
+                      上面一行只放录制范围（下拉框加宽到 180），下面一行两个开关各占一半，
+                      开关贴到各自一半的右端，中间留白。
+                    -->
+                    <StackPanel Margin="0,24,0,0">
+                        <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="录制范围" />
+                        <ComboBox x:Name="RecordScopeBox" Width="180" SelectedIndex="0" Margin="0,6,0,0" HorizontalAlignment="Left">
+                            <ComboBoxItem Content="全屏" />
+                            <ComboBoxItem Content="区域…" />
+                            <ComboBoxItem Content="窗口…" />
+                        </ComboBox>
+                        <Grid Margin="0,20,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                    <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="系统声音" />
+                                    <TextBlock x:Name="SystemAudioStateText" FontSize="13" Margin="0,4,0,0"
+                                               Foreground="{StaticResource TextPrimaryBrush}" Text="开启" />
+                                </StackPanel>
+                                <ToggleButton Grid.Column="3" x:Name="SystemAudioToggle" Style="{StaticResource SwitchToggle}"
+                                              IsChecked="True" VerticalAlignment="Center"
+                                              Checked="OnSystemAudioToggleChanged"
+                                              Unchecked="OnSystemAudioToggleChanged" />
+                            </Grid>
+                            <Grid Grid.Column="1" Margin="28,0,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                    <TextBlock FontSize="12" Foreground="{StaticResource TextMutedBrush}" Text="麦克风" />
+                                    <TextBlock x:Name="MicrophoneStateText" FontSize="13" Margin="0,4,0,0"
+                                               Foreground="{StaticResource TextPrimaryBrush}" Text="关闭" />
+                                </StackPanel>
+                                <ToggleButton Grid.Column="3" x:Name="MicrophoneToggle" Style="{StaticResource SwitchToggle}"
+                                              IsChecked="False" VerticalAlignment="Center"
+                                              Checked="OnMicrophoneToggleChanged"
+                                              Unchecked="OnMicrophoneToggleChanged" />
+                            </Grid>
+                        </Grid>
+                    </StackPanel>
                     <TextBlock x:Name="SizeHintText" Margin="0,20,0,0" FontSize="12" LineHeight="18"
                                Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
                 </StackPanel>
