@@ -5,6 +5,7 @@
         Width="520" Height="520"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterOwner"
+        FontFamily="{StaticResource AppFontFamily}"
         Background="{StaticResource PageBackground}">
     <!-- 只改样式，不改功能。配色和主窗口同一套：主色 #0E9A8B，深蓝 #14557A 点缀。 -->
     <Window.Resources>
@@ -182,13 +183,13 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="区域截图" VerticalAlignment="Center" />
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeyRegionBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeyRegionBox" Margin="0,0,0,6" FontFamily="{StaticResource TitleFontFamily}" FontWeight="Medium" />
                 <TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="全屏截图" VerticalAlignment="Center" />
-                <TextBox Grid.Row="1" Grid.Column="1" x:Name="HotkeyFullscreenBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="HotkeyFullscreenBox" Margin="0,0,0,6" FontFamily="{StaticResource TitleFontFamily}" FontWeight="Medium" />
                 <TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="开始 / 停止录屏" VerticalAlignment="Center" />
-                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyRecordBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyRecordBox" Margin="0,0,0,6" FontFamily="{StaticResource TitleFontFamily}" FontWeight="Medium" />
                 <TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="暂停 / 继续" VerticalAlignment="Center" />
-                <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Margin="0,0,0,6" FontFamily="{StaticResource TitleFontFamily}" FontWeight="Medium" />
             </Grid>
 
             <TextBlock Margin="0,14,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
