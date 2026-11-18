@@ -47,6 +47,11 @@ public partial class MainWindow : Window
         // 系统声音开关：按保存下来的设置显示，默认开。
         SystemAudioToggle.IsChecked = _settings.RecordSystemAudio;
         UpdateSystemAudioLabel();
+
+        // 麦克风开关：按保存下来的设置显示，默认关。UI 上默认也是关的，
+        // 和设置里的默认值一致，不会界面上显示开、实际是关。
+        MicrophoneToggle.IsChecked = _settings.RecordMicrophone;
+        UpdateMicrophoneLabel();
         Closing += (_, e) =>
         {
             // 点右上角 × 不是退出，是缩到托盘；想退出请点托盘菜单“退出”。
@@ -181,6 +186,19 @@ public partial class MainWindow : Window
         SystemAudioStateText.Text = _settings.RecordSystemAudio ? "开启" : "关闭";
     }
 
+    /// <summary>麦克风开关：真开关，默认关；打开后这次录屏会录人声。</summary>
+    private void OnMicrophoneToggleChanged(object sender, RoutedEventArgs e)
+    {
+        _settings.RecordMicrophone = MicrophoneToggle.IsChecked == true;
+        App.Settings.Save();
+        UpdateMicrophoneLabel();
+    }
+
+    private void UpdateMicrophoneLabel()
+    {
+        MicrophoneStateText.Text = _settings.RecordMicrophone ? "开启" : "关闭";
+    }
+
     /// <summary>底部状态栏：截图目录 / 录屏目录，打开实际保存文件的文件夹。</summary>
     private void OnOpenShotFolderClick(object sender, RoutedEventArgs e) => OpenSaveFolder();
 
@@ -282,8 +300,11 @@ public partial class MainWindow : Window
         var width = region?.Width ?? target.Width;
         var height = region?.Height ?? target.Height;
         var audioNote = _settings.RecordSystemAudio
-            ? "系统声：开启（不录麦克风）。"
-            : "系统声：已关，这次录屏没有声音。";
+            ? "系统声：开启。"
+            : "系统声：已关，这次录屏没有系统声。";
+        audioNote += _settings.RecordMicrophone
+            ? "麦克风：开启，会录人声。"
+            : "麦克风：关闭，不录人声。";
         var warning = RecordingService.BuildSizeWarning(_settings, width, height);
         var answer = System.Windows.MessageBox.Show(
             $"{warning}\n\n{audioNote}\n保存到：{_settings.SaveFolder}\n\n点“确定”开始录，点“取消”就不录。",
@@ -302,6 +323,16 @@ public partial class MainWindow : Window
         RunSafely(() =>
         {
             _recording.Start(target, region);
+            // 麦克风开关开了但打不开（没插、被独占）：录屏照常继续，
+            // 只录系统声，这里提醒一次，免得用户以为录上了人声。
+            if (_recording.MicrophoneFailed)
+            {
+                System.Windows.MessageBox.Show(
+                    "麦克风打不开（没插麦克风、被别的程序占了，或者驱动有问题），这次录屏只录系统声，没有人声。\n\n想录人声的话，检查一下麦克风再试。",
+                    "麦克风打不开",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
             // 开始录之后：开始按钮变灰防误点，暂停 / 停止可用，红点亮起并呼吸。
             RecordButton.IsEnabled = false;
             PauseButton.IsEnabled = true;
