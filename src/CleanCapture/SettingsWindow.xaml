@@ -1,0 +1,70 @@
+<Window x:Class="CleanCapture.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置 — CleanCapture"
+        Width="520" Height="520"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterOwner">
+    <ScrollViewer Margin="20">
+        <StackPanel>
+            <TextBlock FontSize="16" FontWeight="Bold" Text="设置" />
+
+            <TextBlock Margin="0,14,0,0" Text="保存路径（截图和录屏都存到这里，默认是桌面）" />
+            <StackPanel Orientation="Horizontal">
+                <TextBox x:Name="SaveFolderBox" Width="340" IsReadOnly="True" />
+                <Button Content="浏览…" Click="OnBrowseClick" />
+            </StackPanel>
+
+            <TextBlock Margin="0,14,0,0" Text="录屏画质" />
+            <ComboBox x:Name="QualityBox" SelectedIndex="0">
+                <ComboBoxItem Content="高清近无损（H.264 CRF 16，默认）" />
+                <ComboBoxItem Content="真无损（FFV1 / MKV，文件很大）" />
+            </ComboBox>
+            <TextBlock Foreground="Gray" TextWrapping="Wrap"
+                       Text="真无损不是“更清楚一点”，是“一帧都不丢”，文件会大几倍到十几倍。录之前程序会先提示大概占多少空间。" />
+
+            <TextBlock Margin="0,14,0,0" Text="帧率" />
+            <ComboBox x:Name="FrameRateBox" SelectedIndex="0">
+                <ComboBoxItem Content="30 帧/秒（默认，够用又省空间）" />
+                <ComboBoxItem Content="60 帧/秒（更顺滑，文件更大）" />
+            </ComboBox>
+
+            <CheckBox x:Name="ShowCursorBox" Margin="0,14,0,0" Content="录屏时录上鼠标光标" IsChecked="True" />
+            <CheckBox x:Name="CopyShotBox" Content="截图后自动复制到剪贴板" IsChecked="True" />
+
+            <TextBlock Margin="0,14,0,0" Text="声音：只录系统声，不录麦克风（立项时定死的，这里改不了）" Foreground="Gray" />
+
+            <TextBlock Margin="0,14,0,0" FontWeight="Bold" Text="快捷键（点一下框，按新组合键即可改）" />
+            <TextBlock Foreground="Gray" TextWrapping="Wrap"
+                       Text="写法像 Ctrl+Shift+S。如果改完按了没反应，一般是被微信、QQ 或别的软件占了，换个组合再试。" />
+            <Grid Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="区域截图" VerticalAlignment="Center" />
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeyRegionBox" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="全屏截图" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="HotkeyFullscreenBox" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="开始 / 停止录屏" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyRecordBox" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="暂停 / 继续" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Margin="0,0,0,6" />
+            </Grid>
+
+            <TextBlock Margin="0,14,0,0" Foreground="Gray" TextWrapping="Wrap"
+                       Text="没有开机自启开关：立项时定死开机不自启。想用的时候双击打开就行，用完点托盘菜单退出。" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                <Button Content="保存" Click="OnSaveClick" />
+                <Button Content="取消" Click="OnCancelClick" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
