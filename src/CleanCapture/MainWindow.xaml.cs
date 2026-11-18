@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using CleanCapture.Models;
 using CleanCapture.Services;
-using Windows.Graphics.Capture;
 
 namespace CleanCapture;
 
@@ -140,9 +139,12 @@ public partial class MainWindow : Window
         }
 
         // 还没开始录：先看录什么范围。
+        // 2026-11-18 改走 GDI：画面范围不再用 GraphicsCaptureItem，
+        // 改用 CaptureTarget（全屏就是主屏幕矩形，窗口就是窗口在屏幕上的位置），
+        // 见 GdiCaptureSource.cs。区域录屏仍是先抓全屏、再让 FFmpeg 裁剪。
         var scope = (RecordScopeBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "全屏";
         Rectangle? region = null;
-        GraphicsCaptureItem? item = null;
+        CaptureTarget? target = null;
 
         if (scope == "区域…")
         {
@@ -154,7 +156,7 @@ public partial class MainWindow : Window
             }
 
             region = picked;
-            item = WindowListHelper.CreateItemForPrimaryScreen();
+            target = CaptureTarget.ForPrimaryScreen();
         }
         else if (scope == "窗口…")
         {
@@ -164,17 +166,17 @@ public partial class MainWindow : Window
                 return;
             }
 
-            item = WindowListHelper.CreateItemForWindow(picked.Value.Handle);
+            target = CaptureTarget.ForWindow(picked.Value.Handle);
         }
         else
         {
-            item = WindowListHelper.CreateItemForPrimaryScreen();
+            target = CaptureTarget.ForPrimaryScreen();
         }
 
-        if (item == null)
+        if (target == null)
         {
             MessageBox.Show(
-                "拿不到这个画面，可能是窗口关了，或者是管理员权限的窗口。\n请换个窗口试试，或者改录全屏。",
+                "拿不到这个窗口的位置，可能是窗口关了或最小化了。\n请换个窗口试试，或者改录全屏。",
                 "CleanCapture：拿不到画面",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -182,8 +184,8 @@ public partial class MainWindow : Window
         }
 
         // 录之前先把“大概占多少空间”说清楚，真无损尤其要提醒。
-        var width = region?.Width ?? item.Size.Width;
-        var height = region?.Height ?? item.Size.Height;
+        var width = region?.Width ?? target.Width;
+        var height = region?.Height ?? target.Height;
         var warning = RecordingService.BuildSizeWarning(_settings, width, height);
         var answer = MessageBox.Show(
             $"{warning}\n\n只录系统声，不录麦克风。\n保存到：{_settings.SaveFolder}\n\n点“确定”开始录，点“取消”就不录。",
@@ -197,7 +199,7 @@ public partial class MainWindow : Window
 
         RunSafely(() =>
         {
-            _recording.Start(item, region);
+            _recording.Start(target, region);
             RecordButton.Content = "停止录屏";
             PauseButton.IsEnabled = true;
             StatusText.Text = "录制中 00:00";
