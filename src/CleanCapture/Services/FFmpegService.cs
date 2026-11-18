@@ -96,7 +96,8 @@ public static class FFmpegService
     {
         // -y：同名文件直接覆盖，不停下来问“要不要覆盖”。
         // -f rawvideo -pix_fmt bgra：告诉 FFmpeg，进来的就是一帧帧的原始 BGRA 画面。
-        // -s WxH -r 帧率：画面尺寸和帧率要和 GraphicsCaptureSource 送进来的一致。
+        // -s WxH -r 帧率：画面尺寸和帧率要和 GdiCaptureSource 送进来的一致。
+        // GDI 位图是 32 位 ARGB，内存里的字节顺序就是 BGRA，和这里的 pix_fmt bgra 是同一套。
         var head = $"-y -f rawvideo -pix_fmt bgra -s {width}x{height} -r {frameRate} -i - ";
 
         // 区域录屏：先抓全屏，再用 crop 裁成用户框的那一块。
