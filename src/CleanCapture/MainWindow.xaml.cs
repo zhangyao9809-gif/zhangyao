@@ -173,9 +173,17 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>系统声音开关：真开关，关了这次录屏就没有声音；麦克风永远不录。</summary>
+    /// <summary>系统声音开关：真开关，关了这次录屏就没有系统声。</summary>
     private void OnSystemAudioToggleChanged(object sender, RoutedEventArgs e)
     {
+        // 2026-11-19 闪退修复：XAML 加载时 IsChecked="True" 会立刻触发 Checked，
+        // 那时候构造函数还没执行到 _settings = ... 这一行，_settings 是 null，
+        // 直接用就空引用闪退。加载期间先跳过，构造函数后面会按保存的设置再设一次。
+        if (_settings == null)
+        {
+            return;
+        }
+
         _settings.RecordSystemAudio = SystemAudioToggle.IsChecked == true;
         App.Settings.Save();
         UpdateSystemAudioLabel();
@@ -183,12 +191,21 @@ public partial class MainWindow : Window
 
     private void UpdateSystemAudioLabel()
     {
-        SystemAudioStateText.Text = _settings.RecordSystemAudio ? "开启" : "关闭";
+        if (SystemAudioStateText != null && _settings != null)
+        {
+            SystemAudioStateText.Text = _settings.RecordSystemAudio ? "开启" : "关闭";
+        }
     }
 
     /// <summary>麦克风开关：真开关，默认关；打开后这次录屏会录人声。</summary>
     private void OnMicrophoneToggleChanged(object sender, RoutedEventArgs e)
     {
+        // 同上：加载期间 _settings 还是 null，先跳过。
+        if (_settings == null)
+        {
+            return;
+        }
+
         _settings.RecordMicrophone = MicrophoneToggle.IsChecked == true;
         App.Settings.Save();
         UpdateMicrophoneLabel();
@@ -196,7 +213,10 @@ public partial class MainWindow : Window
 
     private void UpdateMicrophoneLabel()
     {
-        MicrophoneStateText.Text = _settings.RecordMicrophone ? "开启" : "关闭";
+        if (MicrophoneStateText != null && _settings != null)
+        {
+            MicrophoneStateText.Text = _settings.RecordMicrophone ? "开启" : "关闭";
+        }
     }
 
     /// <summary>底部状态栏：截图目录 / 录屏目录，打开实际保存文件的文件夹。</summary>
