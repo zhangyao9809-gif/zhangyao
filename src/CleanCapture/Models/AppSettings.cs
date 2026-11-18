@@ -90,7 +90,7 @@ public sealed class AppSettings
         }
 
         // 注意：系统声音开关不再这里强制 true 了——主窗口的开关是真的，
-        // 关了就是关了；麦克风依然永远不录（根本没有这个开关）。
+        // 关了就是关了；麦克风开关默认关，打开才录人声。
 
         // 分辨率档只有三档，设置文件被手改坏了就回默认原画。
         if (!Enum.IsDefined(Resolution))
@@ -110,7 +110,14 @@ public sealed class AppSettings
 
     private static string MigrateHotkey(string current, string oldDefault, string newDefault)
     {
-        return string.Equals(current?.Trim(), oldDefault, StringComparison.OrdinalIgnoreCase)
+        // 设置文件里缺了这一项（null 或空）时直接给新默认，别留 null，
+        // 否则每次启动都会弹“快捷键写错了”。
+        if (string.IsNullOrWhiteSpace(current))
+        {
+            return newDefault;
+        }
+
+        return string.Equals(current.Trim(), oldDefault, StringComparison.OrdinalIgnoreCase)
             ? newDefault
             : current;
     }
