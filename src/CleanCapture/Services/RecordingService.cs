@@ -8,7 +8,7 @@ using CleanCapture.Models;
 namespace CleanCapture.Services;
 
 /// <summary>
-/// 录屏总指挥：把“画面 + 系统声 + FFmpeg”三件事串起来。
+/// 录屏总指挥：把“画面 + 系统声 + 麦克风 + FFmpeg”几件事串起来。
 /// 开始 → 暂停 → 继续 → 停止，四个状态都在这里管。
 ///
 /// 真实流程：
@@ -22,7 +22,8 @@ namespace CleanCapture.Services;
 ///    恢复时继续写帧。注意：暂停期间画面时间会断一下，这是 MVP 的取舍，
 ///    换来的是实现简单、不容易把 FFmpeg 写死。
 /// 3. 停止：关画面源 → 关 FFmpeg（等它把尾巴写完）→
-///    如果有系统声，就用 FFmpeg 把“无声视频 + WAV”合成最终文件；
+///    如果有声音，就用 FFmpeg 把“无声视频 + WAV”合成最终文件；
+///    系统声和麦克风是两路 WAV，两路都有时先混成一路再合；
 ///    没声音就直接把视频改成最终文件名。临时文件随后删掉。
 ///
 /// 文件名：最终文件在桌面，临时文件在系统临时文件夹，录完就删，不留垃圾。
@@ -34,6 +35,7 @@ public sealed class RecordingService : IDisposable
 
     private GdiCaptureSource? _captureSource;
     private SystemAudioCapture? _audioCapture;
+    private MicrophoneCapture? _micCapture;
     private Process? _ffmpeg;
     private string? _ffmpegPath;
     private string? _tempVideoPath;
@@ -48,6 +50,13 @@ public sealed class RecordingService : IDisposable
     public bool IsRecording { get; private set; }
 
     public bool IsPaused => _isPaused;
+
+    /// <summary>
+    /// 这次录屏里麦克风有没有打开失败（没插麦克风、被别的程序独占、驱动出问题）。
+    /// 失败时录屏照常继续，只是没有人声；主窗口用这个给用户弹一次提示。
+    /// 每次 Start 都先清零。
+    /// </summary>
+    public bool MicrophoneFailed { get; private set; }
 
     public TimeSpan Elapsed => _elapsed + (IsRecording && !_isPaused
         ? DateTime.Now - _segmentStart
@@ -117,7 +126,7 @@ public sealed class RecordingService : IDisposable
                 target.Width, target.Height, _settings.FrameRate, lossless, _tempVideoPath, crop, outputHeight);
             _ffmpeg = FFmpegService.Start(_ffmpegPath, args);
 
-            // 2. 起系统声（只录系统声，不开麦克风）。
+            // 2. 起系统声（开关默认开，关了这次录屏就没系统声）。
             if (_settings.RecordSystemAudio)
             {
                 try
@@ -129,6 +138,23 @@ public sealed class RecordingService : IDisposable
                 {
                     // 没声卡、没默认播放设备时，录屏还能继续，只是没声音。
                     _audioCapture = null;
+                }
+            }
+
+            // 2b. 起麦克风：默认关，开关打开才录。打不开（没麦克风、被独占）
+            // 也不让录屏崩掉，记下来给主窗口提示，这次就只录系统声。
+            MicrophoneFailed = false;
+            if (_settings.RecordMicrophone)
+            {
+                try
+                {
+                    _micCapture = new MicrophoneCapture();
+                    _micCapture.Start(_tempFolder);
+                }
+                catch
+                {
+                    _micCapture = null;
+                    MicrophoneFailed = true;
                 }
             }
 
@@ -263,6 +289,15 @@ public sealed class RecordingService : IDisposable
 
             try
             {
+                _micCapture?.Stop();
+            }
+            catch
+            {
+                // 同上。
+            }
+
+            try
+            {
                 var stdin = _ffmpeg?.StandardInput.BaseStream;
                 stdin?.Flush();
                 stdin?.Close();
@@ -294,7 +329,11 @@ public sealed class RecordingService : IDisposable
         }
     }
 
-    /// <summary>把临时视频 + 临时 WAV 合成最终文件；没声音就直接改名。</summary>
+    /// <summary>
+    /// 把临时视频 + 临时 WAV 合成最终文件；没声音就直接改名。
+    /// 声音有三种情况：只有系统声、只有麦克风、两路都有——
+    /// 两路都有时用 amix 混成一路，见 FFmpegService.BuildMuxArguments。
+    /// </summary>
     private string? FinishMux()
     {
         if (_tempVideoPath == null || !File.Exists(_tempVideoPath) || _finalPath == null)
@@ -303,11 +342,12 @@ public sealed class RecordingService : IDisposable
         }
 
         // 临时视频本身已经是能播的文件：没声音时直接挪到桌面就行。
-        var hasAudio = _audioCapture is { HasAudio: true }
-            && _audioCapture.TempWavPath is { } wav
-            && File.Exists(wav);
+        var sysWav = _audioCapture is { HasAudio: true } && _audioCapture.TempWavPath is { } s
+            && File.Exists(s) ? s : null;
+        var micWav = _micCapture is { HasAudio: true } && _micCapture.TempWavPath is { } m
+            && File.Exists(m) ? m : null;
 
-        if (!hasAudio)
+        if (sysWav == null && micWav == null)
         {
             try
             {
@@ -322,8 +362,10 @@ public sealed class RecordingService : IDisposable
         }
 
         // 有声音：再跑一次 FFmpeg 混流，画面不重新编码，速度很快。
-        var muxArgs = FFmpegService.BuildMuxArguments(
-            _tempVideoPath, _audioCapture!.TempWavPath!, _finalPath);
+        // 只有一路声音时直接合，两路都有时先混音再合。
+        var muxArgs = sysWav != null && micWav != null
+            ? FFmpegService.BuildMuxArguments(_tempVideoPath, sysWav, micWav, _finalPath)
+            : FFmpegService.BuildMuxArguments(_tempVideoPath, (sysWav ?? micWav)!, _finalPath);
         var ok = FFmpegService.RunOnce(_ffmpegPath ?? "ffmpeg.exe", muxArgs);
         if (ok && File.Exists(_finalPath))
         {
@@ -362,10 +404,24 @@ public sealed class RecordingService : IDisposable
             // 同上。
         }
 
+        try
+        {
+            if (_micCapture?.TempWavPath is { } micWav && File.Exists(micWav))
+            {
+                File.Delete(micWav);
+            }
+        }
+        catch
+        {
+            // 同上。
+        }
+
         _captureSource?.Dispose();
         _captureSource = null;
         _audioCapture?.Dispose();
         _audioCapture = null;
+        _micCapture?.Dispose();
+        _micCapture = null;
         _ffmpeg?.Dispose();
         _ffmpeg = null;
     }
@@ -379,6 +435,7 @@ public sealed class RecordingService : IDisposable
 
         _captureSource?.Dispose();
         _audioCapture?.Dispose();
+        _micCapture?.Dispose();
         _ffmpeg?.Dispose();
     }
 }
