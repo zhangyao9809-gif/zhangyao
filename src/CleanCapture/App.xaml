@@ -19,6 +19,14 @@
             -->
             <FontFamily x:Key="AppFontFamily">pack://application:,,,/Fonts/#HarmonyOS Sans SC, Microsoft YaHei UI, Segoe UI</FontFamily>
             <FontFamily x:Key="TitleFontFamily">pack://application:,,,/Fonts/#Poppins</FontFamily>
+            <!--
+              页面底色必须放这里（App 级资源），不能只放在某个窗口自己的 Resources 里：
+              窗口标签自己的属性（比如 Background="{StaticResource PageBackground}"）
+              是在 Window.Resources 加载之前就求值的，写在窗口里它找不到，
+              一启动就报“无法找到名为 PageBackground 的资源”直接闪退。
+              2026-11-19 就是这个错导致新版双击打不开。
+            -->
+            <SolidColorBrush x:Key="PageBackground" Color="#F2F7FF" />
             <Style TargetType="Button">
                 <Setter Property="Padding" Value="14,7" />
                 <Setter Property="Margin" Value="0,0,8,8" />
