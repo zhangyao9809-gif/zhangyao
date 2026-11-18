@@ -324,7 +324,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- 截图卡片 -->
-            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,10,0">
+            <Border Grid.Column="0" Style="{StaticResource CardBorder}" Margin="0,0,10,0" Padding="28">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Border Width="56" Height="56" CornerRadius="16"
@@ -391,7 +391,7 @@
             </Border>
 
             <!-- 录屏卡片 -->
-            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="10,0,0,0">
+            <Border Grid.Column="1" Style="{StaticResource CardBorder}" Margin="10,0,0,0" Padding="28">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal">
                         <Border Width="56" Height="56" CornerRadius="16"
@@ -435,7 +435,7 @@
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                    <Grid Margin="0,20,0,0">
+                    <Grid Margin="0,24,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
@@ -452,7 +452,7 @@
                                 </ComboBox>
                             </StackPanel>
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE767;" FontSize="18"
                                        Foreground="{StaticResource TextMutedBrush}"
                                        VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -466,7 +466,7 @@
                                           Checked="OnSystemAudioToggleChanged"
                                           Unchecked="OnSystemAudioToggleChanged" />
                         </StackPanel>
-                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0,0,0">
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="32,0,0,0">
                             <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE720;" FontSize="18"
                                        Foreground="{StaticResource TextMutedBrush}"
                                        VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -481,7 +481,7 @@
                                           Unchecked="OnMicrophoneToggleChanged" />
                         </StackPanel>
                     </Grid>
-                    <TextBlock x:Name="SizeHintText" Margin="0,16,0,0" FontSize="12"
+                    <TextBlock x:Name="SizeHintText" Margin="0,20,0,0" FontSize="12" LineHeight="18"
                                Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
@@ -515,8 +515,8 @@
                         <Border Background="{StaticResource KeycapBackground}"
                                 BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
                                 CornerRadius="8" Padding="10,6">
-                            <TextBlock x:Name="HotkeyRegionText" FontFamily="{StaticResource TitleFontFamily}" FontSize="13"
-                                       FontWeight="Medium" Foreground="{StaticResource AccentBlueBrush}" />
+                            <TextBlock x:Name="HotkeyRegionText" FontFamily="{StaticResource KeycapFontFamily}" FontSize="13"
+                                       Foreground="{StaticResource AccentBlueBrush}" />
                         </Border>
                         <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextPrimaryBrush}" Text="区域截图" />
@@ -525,8 +525,8 @@
                         <Border Background="{StaticResource KeycapBackground}"
                                 BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
                                 CornerRadius="8" Padding="10,6">
-                            <TextBlock x:Name="HotkeyFullscreenText" FontFamily="{StaticResource TitleFontFamily}" FontSize="13"
-                                       FontWeight="Medium" Foreground="{StaticResource AccentBlueBrush}" />
+                            <TextBlock x:Name="HotkeyFullscreenText" FontFamily="{StaticResource KeycapFontFamily}" FontSize="13"
+                                       Foreground="{StaticResource AccentBlueBrush}" />
                         </Border>
                         <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextPrimaryBrush}" Text="全屏截图" />
@@ -535,8 +535,8 @@
                         <Border Background="{StaticResource KeycapBackground}"
                                 BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
                                 CornerRadius="8" Padding="10,6">
-                            <TextBlock x:Name="HotkeyRecordText" FontFamily="{StaticResource TitleFontFamily}" FontSize="13"
-                                       FontWeight="Medium" Foreground="{StaticResource AccentBlueBrush}" />
+                            <TextBlock x:Name="HotkeyRecordText" FontFamily="{StaticResource KeycapFontFamily}" FontSize="13"
+                                       Foreground="{StaticResource AccentBlueBrush}" />
                         </Border>
                         <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextPrimaryBrush}" Text="开始/停止录屏" />
@@ -545,8 +545,8 @@
                         <Border Background="{StaticResource KeycapBackground}"
                                 BorderBrush="{StaticResource KeycapBorderBrush}" BorderThickness="1"
                                 CornerRadius="8" Padding="10,6">
-                            <TextBlock x:Name="HotkeyPauseText" FontFamily="{StaticResource TitleFontFamily}" FontSize="13"
-                                       FontWeight="Medium" Foreground="{StaticResource AccentBlueBrush}" />
+                            <TextBlock x:Name="HotkeyPauseText" FontFamily="{StaticResource KeycapFontFamily}" FontSize="13"
+                                       Foreground="{StaticResource AccentBlueBrush}" />
                         </Border>
                         <TextBlock FontSize="13" Margin="8,0,0,0" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextPrimaryBrush}" Text="暂停录屏" />
