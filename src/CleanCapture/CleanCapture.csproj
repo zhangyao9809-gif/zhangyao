@@ -27,6 +27,24 @@
     <Resource Include="icon.png" />
     <Resource Include="icon.ico" />
   </ItemGroup>
+
+  <!--
+    字体文件（2026-11-18，学设计图的字体）：
+    设计图的标题是 Poppins 风格的几何粗体无衬线，中文是圆润的现代黑体
+    （像苹方 / 鸿蒙 Sans SC）。Windows 自带字体里没有这两个，
+    所以把字体文件直接编进程序集，换电脑也能显示出一样的效果。
+    - Poppins（OFL 开源）：标题 CleanCapture 用 Bold，快捷键键帽用 Medium。
+    - HarmonyOS Sans SC（华为免费字体）：中文正文和按钮，Regular + Bold。
+    字体文件约 17 MB，成品包会从 136 MB 涨到 150 MB 左右，可以接受。
+    引用方式：FontFamily="pack://application:,,,/Fonts/#Poppins"。
+  -->
+  <ItemGroup>
+    <Resource Include="Fonts\HarmonyOS_Sans_SC_Regular.ttf" />
+    <Resource Include="Fonts\HarmonyOS_Sans_SC_Bold.ttf" />
+    <Resource Include="Fonts\Poppins-Regular.ttf" />
+    <Resource Include="Fonts\Poppins-Medium.ttf" />
+    <Resource Include="Fonts\Poppins-Bold.ttf" />
+  </ItemGroup>
     <Version>0.1.0</Version>
     <FileVersion>0.1.0.0</FileVersion>
     <Description>自用纯净截图录屏小工具：截图 PNG 无损，录屏分真无损 / 高清两档，只录系统声。</Description>
