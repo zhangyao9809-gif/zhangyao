@@ -156,6 +156,24 @@ public static class FFmpegService
         return $"-y -i \"{videoPath}\" -i \"{audioPath}\" -c:v copy -c:a aac -b:a 192k -shortest \"{finalPath}\"";
     }
 
+    /// <summary>
+    /// 录完后把“只有画面的视频 + 系统声 WAV + 麦克风 WAV”合成一个文件。
+    /// 两路声音先统一成 48kHz 立体声，再用 amix 混成一路：
+    /// normalize=0 是不把音量压小（默认会把每路除以路数，听着变轻），
+    /// 两路同时很响时可能轻微削波，平时说话 + 系统声不会到那个程度。
+    /// </summary>
+    public static string BuildMuxArguments(string videoPath, string systemAudioPath, string micAudioPath, string finalPath)
+    {
+        // [1:a] 是系统声，[2:a] 是麦克风；先各自重采样、转立体声，
+        // 再混成一路 [a]，画面照样 -c:v copy 不重新编码。
+        const string filter =
+            "[1:a]aresample=48000,aformat=channel_layouts=stereo[a1];" +
+            "[2:a]aresample=48000,aformat=channel_layouts=stereo[a2];" +
+            "[a1][a2]amix=inputs=2:duration=longest:normalize=0[a]";
+        return $"-y -i \"{videoPath}\" -i \"{systemAudioPath}\" -i \"{micAudioPath}\" " +
+               $"-filter_complex \"{filter}\" -map 0:v -map \"[a]\" -c:v copy -c:a aac -b:a 192k -shortest \"{finalPath}\"";
+    }
+
     /// <summary>真无损那一路没有声音时用的混流：直接把视频改名/换容器，不重新编码。</summary>
     public static string BuildRemuxArguments(string videoPath, string finalPath)
     {
