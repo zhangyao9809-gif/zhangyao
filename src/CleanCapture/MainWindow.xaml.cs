@@ -175,7 +175,7 @@ public partial class MainWindow : Window
 
         if (target == null)
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 "拿不到这个窗口的位置，可能是窗口关了或最小化了。\n请换个窗口试试，或者改录全屏。",
                 "CleanCapture：拿不到画面",
                 MessageBoxButton.OK,
@@ -187,7 +187,7 @@ public partial class MainWindow : Window
         var width = region?.Width ?? target.Width;
         var height = region?.Height ?? target.Height;
         var warning = RecordingService.BuildSizeWarning(_settings, width, height);
-        var answer = MessageBox.Show(
+        var answer = System.Windows.MessageBox.Show(
             $"{warning}\n\n只录系统声，不录麦克风。\n保存到：{_settings.SaveFolder}\n\n点“确定”开始录，点“取消”就不录。",
             "开始录屏？",
             MessageBoxButton.OKCancel,
@@ -270,7 +270,7 @@ public partial class MainWindow : Window
         var windows = WindowListHelper.ListWindows();
         if (windows.Count == 0)
         {
-            MessageBox.Show("现在没有能截 / 能录的窗口。", "CleanCapture", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show("现在没有能截 / 能录的窗口。", "CleanCapture", MessageBoxButton.OK, MessageBoxImage.Information);
             return null;
         }
 
@@ -280,14 +280,14 @@ public partial class MainWindow : Window
             Width = 480,
             Height = 360,
             WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Owner = Application.Current.MainWindow,
+            Owner = System.Windows.Application.Current.MainWindow,
         };
 
-        var list = new ListBox { ItemsSource = windows.Select(w => w.Title).ToList() };
+        var list = new System.Windows.Controls.ListBox { ItemsSource = windows.Select(w => w.Title).ToList() };
         list.SelectedIndex = 0;
         list.MouseDoubleClick += (_, _) => dialog.DialogResult = true;
 
-        var okButton = new Button { Content = "确定", Margin = new Thickness(0, 8, 0, 0) };
+        var okButton = new System.Windows.Controls.Button { Content = "确定", Margin = new Thickness(0, 8, 0, 0) };
         okButton.Click += (_, _) => dialog.DialogResult = true;
 
         var panel = new StackPanel { Margin = new Thickness(16) };
@@ -313,7 +313,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"这一步没做成：{ex.Message}\n\n如果反复出现，先看 README 第 7 节的常见问题。",
                 "CleanCapture：没做成",
                 MessageBoxButton.OK,
