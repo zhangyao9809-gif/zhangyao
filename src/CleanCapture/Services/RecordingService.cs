@@ -68,11 +68,13 @@ public sealed class RecordingService : IDisposable
     public static string BuildSizeWarning(AppSettings settings, int width, int height)
     {
         var lossless = settings.Quality == RecordingQuality.Lossless;
-        var (_, text) = FFmpegService.EstimateSizePerMinute(width, height, settings.FrameRate, lossless);
+        // 预估按最终存盘的尺寸算：选了 1080p / 720p 时，文件比原画小不少。
+        var (outW, outH) = settings.EffectiveOutputSize(width, height);
+        var (_, text) = FFmpegService.EstimateSizePerMinute(outW, outH, settings.FrameRate, lossless);
         var total = lossless
             ? "录 10 分钟大概要几个 GB，录 30 分钟前请先看一眼 C 盘 / 桌面所在盘还剩多少空间。"
             : "录 30 分钟一般在 1–2 GB 左右，桌面空间不够时请先改保存路径。";
-        return $"{settings.QualityDisplayName}\n{text}\n{total}";
+        return $"{settings.QualityDisplayName}，{settings.ResolutionDisplayName}（{outW}×{outH}）\n{text}\n{total}";
     }
 
     /// <summary>
@@ -109,8 +111,10 @@ public sealed class RecordingService : IDisposable
                 SettingsService.MakeFileName("recording", finalExt));
 
             // 1. 起 FFmpeg：画面从标准输入流进来。
+            // 分辨率档：区域录屏按裁剪后的高算，全屏 / 窗口按目标本身的高算。
+            var outputHeight = _settings.OutputHeightFor(crop?.Height ?? target.Height);
             var args = FFmpegService.BuildVideoArguments(
-                target.Width, target.Height, _settings.FrameRate, lossless, _tempVideoPath, crop);
+                target.Width, target.Height, _settings.FrameRate, lossless, _tempVideoPath, crop, outputHeight);
             _ffmpeg = FFmpegService.Start(_ffmpegPath, args);
 
             // 2. 起系统声（只录系统声，不开麦克风）。
