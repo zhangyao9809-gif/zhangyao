@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!--
       目标：Windows 10 / 11，64 位。不要改成 AnyCPU 去跑 32 位，
-      Graphics Capture + NAudio 环回在 64 位下最稳。
+      GDI 截屏 + NAudio 环回在 64 位下最稳。
       TargetFramework 后面的 10.0.19041.0 是 Windows SDK 的最低版本，
       也就是 Windows 10 2004，Win10 / Win11 都能跑。
     -->
@@ -28,20 +28,34 @@
 
   <ItemGroup>
     <!--
-      这两个包是录屏必须的，缺一不可：
+      2026-11-18 修复（B 路线：去 Vortice，不换包）：
+      云端编译报错 NU1101：原来这里写的 Vortice.Windows 2.7.0
+      在 NuGet 上根本不存在——Vortice.Windows 只是项目总名，
+      真正的包是 Vortice.Direct3D11 之类。
+      换包（A 路线）能过 NU1101，但 GraphicsCaptureSource 里
+      WinRT 和 Vortice 之间的接口写法（D3D11CreateDevice 的重载、
+      Direct3D11Helper.CreateDirect3DDevice、从 Surface 取纹理）
+      有两三处在没有 Windows 编译的情况下核对不了，硬换很可能
+      再报一次编译错。所以删掉 Vortice，录屏改走 GDI：
+      GdiCaptureSource 按帧率用 CopyFromScreen 逐帧截屏供帧，
+      只用截图里已经在用的写法，不引任何新包。
+      下面两个包是现在录屏必须的，缺一不可：
       * NAudio：只用来采“系统声”（WASAPI 环回），不碰麦克风。
         装好后 SystemAudioCapture 才能工作。
-      * Vortice.Windows：用来建 Direct3D 11 设备，给 Graphics Capture
-        提供画布。没有它，GraphicsCaptureSource 里的 D3D 设备建不起来。
+      * System.Drawing.Common：GDI 截屏（Bitmap / Graphics）用的，
+        ScreenshotService 和 GdiCaptureSource 都靠它。
       在 Visual Studio 里：右键项目 → 管理 NuGet 程序包 → 搜名字安装，
       或在“包管理器控制台”执行：
         Install-Package NAudio -Version 2.2.1
-        Install-Package Vortice.Windows -Version 2.7.0
+        Install-Package System.Drawing.Common -Version 8.0.0
       版本号写在这里就是为了让你装的时候不用猜；如果 NuGet 上有了
       更新的稳定版，可以升，但升完要在 Win10 / Win11 各跑一次录屏。
+      核对过（2026-11-18，NuGet 官方接口）：
+      NAudio 2.2.1 存在；System.Drawing.Common 8.0.0 存在；
+      Vortice.Direct3D11 3.6.2 也存在且支持 net8.0-windows，
+      但本项目已不再用 Vortice，所以不引它。
     -->
     <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="Vortice.Windows" Version="2.7.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
   </ItemGroup>
 
