@@ -14,6 +14,19 @@ public enum RecordingQuality
     Lossless
 }
 
+/// <summary>录屏分辨率档：原画不缩放；1080p / 720p 把画面缩小再存，文件更小。</summary>
+public enum RecordingResolution
+{
+    /// <summary>默认：跟屏幕 / 框选区域的原始分辨率一样，不缩放。</summary>
+    Original,
+
+    /// <summary>高缩到 1080，宽按比例跟着缩（1920×1080 的屏就是原样）。</summary>
+    P1080,
+
+    /// <summary>高缩到 720，宽按比例跟着缩。</summary>
+    P720
+}
+
 /// <summary>
 /// 全部设置都存在这里。文件位置见 SettingsService：
 /// 程序旁边的 CleanCapture.settings.json，绿色版、换电脑直接拷走。
@@ -32,6 +45,9 @@ public sealed class AppSettings
     /// <summary>帧率：30 或 60，设置窗口里二选一。</summary>
     public int FrameRate { get; set; } = 30;
 
+    /// <summary>录屏分辨率：原画 / 1080p / 720p，设置窗口里三选一。</summary>
+    public RecordingResolution Resolution { get; set; } = RecordingResolution.Original;
+
     /// <summary>只录系统声。写死 true，不在界面上给麦克风开关。</summary>
     public bool RecordSystemAudio { get; set; } = true;
 
@@ -42,12 +58,15 @@ public sealed class AppSettings
     public bool CopyScreenshotToClipboard { get; set; } = true;
 
     // ---- 全局快捷键（默认值，设置窗口里可以改）----
-    // 故意避开微信 Alt+A、QQ Ctrl+Alt+A 这些常用冲突键。
-    // 如果改完发现按了没反应，先看是不是被别的软件占了，见 README 第 7 节。
-    public string HotkeyRegionScreenshot { get; set; } = "Ctrl+Shift+S";
-    public string HotkeyFullscreenScreenshot { get; set; } = "Ctrl+Shift+F";
-    public string HotkeyToggleRecording { get; set; } = "Ctrl+Shift+R";
-    public string HotkeyPauseRecording { get; set; } = "Ctrl+Shift+P";
+    // 2026-11-18 改过一次：原来默认的 Ctrl+Shift+S / F / R / P
+    // 在用户电脑上注册失败（错误码 1409，被别的软件占了），
+    // 所以改成 Ctrl+Alt+S / F / R / P。微信 Alt+A、QQ Ctrl+Alt+A
+    // 本来就避开了；如果这组也被占了，去设置里换一个组合键，
+    // 比如 Ctrl+Alt+Shift+S。改完记得重启程序再试。
+    public string HotkeyRegionScreenshot { get; set; } = "Ctrl+Alt+S";
+    public string HotkeyFullscreenScreenshot { get; set; } = "Ctrl+Alt+F";
+    public string HotkeyToggleRecording { get; set; } = "Ctrl+Alt+R";
+    public string HotkeyPauseRecording { get; set; } = "Ctrl+Alt+P";
 
     /// <summary>校验一遍，防止设置文件被手改坏了导致程序起不来。</summary>
     public void Normalize()
@@ -64,6 +83,28 @@ public sealed class AppSettings
 
         // 麦克风永远不录：哪怕设置文件里被人改成别的，也在这里纠正回来。
         RecordSystemAudio = true;
+
+        // 分辨率档只有三档，设置文件被手改坏了就回默认原画。
+        if (!Enum.IsDefined(Resolution))
+        {
+            Resolution = RecordingResolution.Original;
+        }
+
+        // 2026-11-18 快捷键迁移：老版本默认的 Ctrl+Shift+S / F / R / P
+        // 在用户电脑上已被别的软件占用（注册失败 1409），新默认改成
+        // Ctrl+Alt+S / F / R / P。已经存下来的设置文件里如果还是
+        // 老的默认值，启动时自动换成新的；用户自己改过的键不动。
+        HotkeyRegionScreenshot = MigrateHotkey(HotkeyRegionScreenshot, "Ctrl+Shift+S", "Ctrl+Alt+S");
+        HotkeyFullscreenScreenshot = MigrateHotkey(HotkeyFullscreenScreenshot, "Ctrl+Shift+F", "Ctrl+Alt+F");
+        HotkeyToggleRecording = MigrateHotkey(HotkeyToggleRecording, "Ctrl+Shift+R", "Ctrl+Alt+R");
+        HotkeyPauseRecording = MigrateHotkey(HotkeyPauseRecording, "Ctrl+Shift+P", "Ctrl+Alt+P");
+    }
+
+    private static string MigrateHotkey(string current, string oldDefault, string newDefault)
+    {
+        return string.Equals(current?.Trim(), oldDefault, StringComparison.OrdinalIgnoreCase)
+            ? newDefault
+            : current;
     }
 
     [JsonIgnore]
@@ -72,4 +113,41 @@ public sealed class AppSettings
         RecordingQuality.Lossless => "真无损（FFV1 / MKV，文件很大）",
         _ => "高清近无损（H.264 CRF 16，默认）",
     };
+
+    [JsonIgnore]
+    public string ResolutionDisplayName => Resolution switch
+    {
+        RecordingResolution.P1080 => "1080p",
+        RecordingResolution.P720 => "720p",
+        _ => "原画",
+    };
+
+    /// <summary>
+    /// 这一路录制最终存盘的高：选了 1080p / 720p 且画面比它高时才缩小，
+    /// 画面本来就比它矮（比如 720p 的屏选 1080p）不放大，直接返回 null。
+    /// </summary>
+    public int? OutputHeightFor(int sourceHeight)
+    {
+        var target = Resolution switch
+        {
+            RecordingResolution.P1080 => 1080,
+            RecordingResolution.P720 => 720,
+            _ => 0,
+        };
+        return target > 0 && sourceHeight > target ? target : null;
+    }
+
+    /// <summary>按分辨率档算最终存盘的宽高（宽按比例缩，并取整到偶数）。</summary>
+    public (int Width, int Height) EffectiveOutputSize(int width, int height)
+    {
+        var targetHeight = OutputHeightFor(height);
+        if (targetHeight == null)
+        {
+            return (width / 2 * 2, height / 2 * 2);
+        }
+
+        var h = targetHeight.Value;
+        var w = (int)Math.Round(width * (h / (double)height)) / 2 * 2;
+        return (w, h);
+    }
 }
