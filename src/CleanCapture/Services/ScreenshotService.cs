@@ -116,7 +116,7 @@ public sealed class ScreenshotService
             {
                 // Clipboard 要在 STA 线程上跑，主窗口本身就是 STA，直接调即可。
                 // 如果是从快捷键的后台线程调过来，调用方要先切回 UI 线程。
-                Clipboard.SetImage(BitmapToBitmapSource(bitmap));
+                System.Windows.Clipboard.SetImage(BitmapToBitmapSource(bitmap));
             }
             catch
             {
