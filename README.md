@@ -42,7 +42,7 @@ mvp-v0.1/
         ├── SettingsService.cs        # 设置存成 JSON、再读回来
         ├── ScreenshotService.cs      # 截图：全屏 / 区域 / 窗口，存 PNG
         ├── RecordingService.cs       # 录屏总指挥：开始 / 暂停 / 停止、混流
-        ├── GraphicsCaptureSource.cs  # 画面来源：Windows Graphics Capture
+        ├── GdiCaptureSource.cs       # 画面来源：GDI 逐帧截图供帧（2026-11-18 修复版，见第 9 节）
         ├── SystemAudioCapture.cs     # 系统声：NAudio WASAPI 环回，只录系统声
         ├── FFmpegService.cs          # 找 ffmpeg.exe、拼命令行、起进程、算大小
         ├── HotkeyService.cs          # 全局快捷键
@@ -57,8 +57,9 @@ mvp-v0.1/
 1. 把整个 `mvp-v0.1` 文件夹拷到 Windows 电脑上，比如 `D:\CleanCapture\`。
 2. 双击 `CleanCapture.sln`，用 Visual Studio 2022 打开。
    - 如果弹“需要安装 .NET 8 / Windows SDK”，按提示装：.NET 8 SDK、“.NET 桌面开发”工作负载。
-   - 第一次打开，Visual Studio 会自动去网上还原 NuGet 包（NAudio、Vortice.Windows、System.Drawing.Common），
-     需要联网一次，之后就不用了。
+   - 第一次打开，Visual Studio 会自动去网上还原 NuGet 包（NAudio、System.Drawing.Common），
+     需要联网一次，之后就不用了。2026-11-18 已去掉 Vortice：云端编译报 NU1101，
+     原来写的 Vortice.Windows 在 NuGet 上不存在，录屏改走 GDI，不再引 Vortice 的包。
 3. 顶部工具栏选 `Release`、`x64`，按 `Ctrl+Shift+B` 生成。
    - 生成成功，输出窗口最后一行会写“生成成功”。
    - 生成失败，先看 `BUILD_AND_TEST.md` 第 3 节“最可能出问题的 5 个点”，九成是那几个。
@@ -140,8 +141,9 @@ dotnet publish src/CleanCapture/CleanCapture.csproj -c Release -r win-x64 --self
    正常误差在 0.2 秒以内；如果差得明显，把测试结果记下来，下个版本再修同步。
 6. **杀毒软件报“不认识 / 有风险”** → 自己编译的 exe 没有商业签名，杀毒软件不认识是正常的。
    点“仍要运行”或加白名单。不要去网上找来路不明的“签名工具”。
-7. **录某个窗口提示“拿不到这个画面”** → 那个窗口可能是管理员权限运行的（比如以管理员身份开的程序），
-   普通权限的 CleanCapture 拿不到它。换个窗口，或改录全屏。
+7. **录某个窗口提示“拿不到这个画面”** → 那个窗口可能关了或最小化了，拿不到它在屏幕上的位置。
+   换个窗口，或改录全屏。另外注意：窗口录制是按窗口在屏幕上的位置截的，
+   被别的窗口盖住的部分，录到的是盖在上面的那个窗口——要录的窗口先把它移到最前面、别被盖住。
 
 ## 8. 哪些还没做（v0.1 故意不做）
 
@@ -157,9 +159,34 @@ dotnet publish src/CleanCapture/CleanCapture.csproj -c Release -r win-x64 --self
 拿到 Windows 电脑上，第一件事就是按 `BUILD_AND_TEST.md` 走一遍：先生成、再按清单测。
 最可能出问题的 3–5 个点已经列在 `BUILD_AND_TEST.md` 第 3 节，生成失败先看那里。
 
+### 2026-11-18 修复：云端编译 NU1101，录屏改走 GDI（B 路线）
+
+- **失败**：GitHub Actions 运行 44290799457，`Restore and publish` 失败 41 秒，
+  `error NU1101: Unable to find package Vortice.Windows`。
+- **原因**：`CleanCapture.csproj` 里写的 `Vortice.Windows 2.7.0` 在 NuGet 上不存在，
+  Vortice.Windows 只是项目总名，真正的包是 Vortice.Direct3D11 之类。
+  核对过（2026-11-18，NuGet 官方接口）：Vortice.Direct3D11 3.6.2 真实存在，
+  且支持 net8.0-windows；NAudio 2.2.1、System.Drawing.Common 8.0.0 也都存在。
+- **为什么没选换包（A 路线）**：换成 Vortice.Direct3D11 3.6.2 能过 NU1101，
+  但原来 `GraphicsCaptureSource.cs` 里 WinRT 和 Vortice 之间的接口写法
+  （`D3D11CreateDevice` 的重载、`Direct3D11Helper.CreateDirect3DDevice`、
+  从 Surface 取 `ID3D11Texture2D`）有两三处在没有 Windows 编译的情况下核对不了，
+  硬换很可能再报一次编译错。
+- **改了什么**：删掉 Vortice 依赖和 `GraphicsCaptureSource.cs`，
+  新增 `GdiCaptureSource.cs`，按帧率用 `CopyFromScreen` 逐帧截屏供帧，
+  复用截图里已经在用的写法，不引任何新包；
+  `RecordingService`、`MainWindow`、`WindowListHelper` 跟着改成用 `CaptureTarget`
+  （全屏是主屏幕矩形，窗口是窗口在屏幕上的位置）。
+  截图、系统声、保存路径、画质双档（FFV1 真无损 + H.264 CRF 16）都不变。
+- **取舍**：CPU 会比原来高一点，60 帧 1080p 下风扇转起来是正常的，觉得卡就改回 30 帧；
+  窗口录制被别的窗口盖住的部分会录到盖在上面的窗口（见第 7 节第 7 条），
+  管理员权限的窗口改录全屏也能录到（GDI 截的是屏幕上的像素）。
+  下一步推送后预期能通过的点：NuGet 还原只剩 NAudio 和 System.Drawing.Common，
+  两个包都已核对存在，`Restore and publish` 不应再报 NU1101。
+
 ## 许可证和来源
 
 - 自用，未发布。不要把编译好的 exe 发到网上。
-- 用到的开源东西：FFmpeg（LGPL/GPL，看你下的包）、NAudio（MIT）、Vortice.Windows（MIT）、
-  Windows Graphics Capture（系统自带接口）。
+- 用到的开源东西：FFmpeg（LGPL/GPL，看你下的包）、NAudio（MIT）、
+  GDI 截屏（Windows 系统自带接口，不用另外装包）。
   用 FFmpeg 时请保留它自带的许可证说明文件，不要删。
