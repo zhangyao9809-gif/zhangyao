@@ -166,7 +166,7 @@
             <CheckBox x:Name="ShowCursorBox" Margin="0,14,0,0" Content="录屏时录上鼠标光标" IsChecked="True" />
             <CheckBox x:Name="CopyShotBox" Content="截图后自动复制到剪贴板" IsChecked="True" />
 
-            <TextBlock Margin="0,14,0,0" Text="声音：主窗口可以开关系统声；麦克风不录（立项时定死的，没有这个开关）" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
+            <TextBlock Margin="0,14,0,0" Text="声音：主窗口可以开关系统声和麦克风；麦克风默认关闭，打开才录人声" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
 
             <TextBlock Margin="0,14,0,0" FontWeight="Bold" Foreground="{StaticResource DeepBlueBrush}" Text="快捷键（点一下框，按新组合键即可改）" />
             <TextBlock Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
