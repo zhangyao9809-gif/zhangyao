@@ -95,7 +95,7 @@ public partial class MainWindow : Window
 
         RunSafely(() =>
         {
-            var path = _screenshots.CaptureWindow(picked.Value.Handle, picked.Value.Title);
+            var path = _screenshots.CaptureWindow(picked.Handle, picked.Title);
             StatusText.Text = $"截图已存到桌面：{System.IO.Path.GetFileName(path)}";
         });
     }
@@ -166,7 +166,7 @@ public partial class MainWindow : Window
                 return;
             }
 
-            target = CaptureTarget.ForWindow(picked.Value.Handle);
+            target = CaptureTarget.ForWindow(picked.Handle);
         }
         else
         {
