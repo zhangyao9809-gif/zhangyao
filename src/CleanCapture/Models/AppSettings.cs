@@ -48,7 +48,10 @@ public sealed class AppSettings
     /// <summary>录屏分辨率：原画 / 1080p / 720p，设置窗口里三选一。</summary>
     public RecordingResolution Resolution { get; set; } = RecordingResolution.Original;
 
-    /// <summary>只录系统声。写死 true，不在界面上给麦克风开关。</summary>
+    /// <summary>
+    /// 系统声音开关：默认开。主窗口的“系统声音”开关可以关掉它（这次录屏就没声音）。
+    /// 麦克风永远不录：没有麦克风开关，立项时定死的。
+    /// </summary>
     public bool RecordSystemAudio { get; set; } = true;
 
     /// <summary>录屏时是否录鼠标光标。默认录，方便看操作。</summary>
@@ -81,8 +84,8 @@ public sealed class AppSettings
             SaveFolder = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
         }
 
-        // 麦克风永远不录：哪怕设置文件里被人改成别的，也在这里纠正回来。
-        RecordSystemAudio = true;
+        // 注意：系统声音开关不再这里强制 true 了——主窗口的开关是真的，
+        // 关了就是关了；麦克风依然永远不录（根本没有这个开关）。
 
         // 分辨率档只有三档，设置文件被手改坏了就回默认原画。
         if (!Enum.IsDefined(Resolution))
