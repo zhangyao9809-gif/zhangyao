@@ -13,7 +13,7 @@
         <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#0B7D72" />
         <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#09685E" />
         <SolidColorBrush x:Key="DeepBlueBrush" Color="#14557A" />
-        <SolidColorBrush x:Key="PageBackground" Color="#F8FAFB" />
+        <!-- 注意：PageBackground 不在这里定义，见 App.xaml（窗口标签自己的属性求值时还看不到这里）。 -->
         <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF" />
         <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1F2A33" />
         <SolidColorBrush x:Key="TextMutedBrush" Color="#6B7A85" />
