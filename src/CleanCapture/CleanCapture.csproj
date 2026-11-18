@@ -21,6 +21,7 @@
     <RootNamespace>CleanCapture</RootNamespace>
     <!-- 专属图标：icon.ico（2026-11-18 生成），exe 文件和主窗口都用它 -->
     <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
 
   <!-- 图标文件显式当作资源编进程序集（标题旁的 icon.png 靠这个显示） -->
   <ItemGroup>
@@ -45,6 +46,8 @@
     <Resource Include="Fonts\Poppins-Medium.ttf" />
     <Resource Include="Fonts\Poppins-Bold.ttf" />
   </ItemGroup>
+
+  <PropertyGroup>
     <Version>0.1.0</Version>
     <FileVersion>0.1.0.0</FileVersion>
     <Description>自用纯净截图录屏小工具：截图 PNG 无损，录屏分真无损 / 高清两档，只录系统声。</Description>
