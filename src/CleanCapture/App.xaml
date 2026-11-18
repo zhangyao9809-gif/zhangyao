@@ -10,6 +10,15 @@
     -->
     <Application.Resources>
         <ResourceDictionary>
+            <!--
+              全局字体（2026-11-18，学设计图的字体）：
+              正文/中文：HarmonyOS Sans SC（圆润现代黑体，像设计图的苹方风格），
+              找不到时回落到微软雅黑 / Segoe UI。
+              标题/键帽：Poppins（几何粗体无衬线，设计图里 CleanCapture 那个字体）。
+              字体文件编在程序集里（Fonts 文件夹），换电脑也一样。
+            -->
+            <FontFamily x:Key="AppFontFamily">pack://application:,,,/Fonts/#HarmonyOS Sans SC, Microsoft YaHei UI, Segoe UI</FontFamily>
+            <FontFamily x:Key="TitleFontFamily">pack://application:,,,/Fonts/#Poppins</FontFamily>
             <Style TargetType="Button">
                 <Setter Property="Padding" Value="14,7" />
                 <Setter Property="Margin" Value="0,0,8,8" />
