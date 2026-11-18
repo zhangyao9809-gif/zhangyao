@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Windows;
 using CleanCapture.Services;
 
@@ -16,10 +17,78 @@ public partial class App : System.Windows.Application
 
     public static TrayService Tray { get; private set; } = null!;
 
+    public App()
+    {
+        // 2026-11-18：打不开不能悄悄没反应。任何没接住的异常，
+        // 都写一份报错日志到桌面、再弹个框把原因告诉用户，
+        // 这样才知道到底是哪一步出的问题，而不是双击了半天什么都没有。
+        DispatcherUnhandledException += (_, e) =>
+        {
+            ReportCrash("界面线程出错", e.Exception);
+            e.Handled = true;
+            Shutdown();
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            ReportCrash("程序出错", e.ExceptionObject as Exception);
+        };
+    }
+
+    /// <summary>报错日志写两份：桌面一份（好找）、程序旁边一份（备用）。写失败就跳过，不再报错。</summary>
+    private static void ReportCrash(string title, Exception? ex)
+    {
+        var detail = ex == null ? "没有拿到具体的错误信息。" : ex.ToString();
+        var text = $"CleanCapture 启动/运行失败（{DateTime.Now:yyyy-MM-dd HH:mm:ss}）\n\n{detail}\n";
+
+        foreach (var path in new[]
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "CleanCapture-启动失败.txt"),
+            Path.Combine(AppContext.BaseDirectory, "CleanCapture-启动失败.txt"),
+        })
+        {
+            try
+            {
+                File.WriteAllText(path, text);
+            }
+            catch
+            {
+                // 日志写不出来也别再弹错。
+            }
+        }
+
+        try
+        {
+            System.Windows.MessageBox.Show(
+                "CleanCapture 没能正常打开，原因已经写进桌面上的 CleanCapture-启动失败.txt。\n\n" +
+                "请把那个文件发给我，我来修。\n\n错误摘要：\n" + (ex?.Message ?? "未知错误"),
+                "CleanCapture：" + title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        catch
+        {
+            // 弹框失败就静默退出，日志已经留下了。
+        }
+    }
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
+        try
+        {
+            StartUpCore();
+        }
+        catch (Exception ex)
+        {
+            // 启动时任何一步炸了，都不要悄悄退出：留日志、弹原因。
+            ReportCrash("启动时出错", ex);
+            Shutdown();
+        }
+    }
+
+    private void StartUpCore()
+    {
         Settings = new SettingsService();
 
         // FFmpeg 不在，直接弹一次提示就好，不要每次启动都弹。
