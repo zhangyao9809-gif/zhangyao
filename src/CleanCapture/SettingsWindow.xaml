@@ -4,39 +4,172 @@
         Title="设置 — CleanCapture"
         Width="520" Height="520"
         ResizeMode="CanMinimize"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource PageBackground}">
+    <!-- 只改样式，不改功能。配色和主窗口同一套：主色 #0E9A8B，深蓝 #14557A 点缀。 -->
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#0E9A8B" />
+        <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#0B7D72" />
+        <SolidColorBrush x:Key="PrimaryPressedBrush" Color="#09685E" />
+        <SolidColorBrush x:Key="DeepBlueBrush" Color="#14557A" />
+        <SolidColorBrush x:Key="PageBackground" Color="#F8FAFB" />
+        <SolidColorBrush x:Key="CardBackground" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#1F2A33" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="#6B7A85" />
+        <SolidColorBrush x:Key="ButtonBorderBrush" Color="#CBD6DC" />
+        <SolidColorBrush x:Key="ButtonHoverBrush" Color="#EFF5F6" />
+        <SolidColorBrush x:Key="ButtonPressedBrush" Color="#E3ECEE" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#DFE7EB" />
+        <!-- 标题带和主按钮共用的青→深蓝渐变（和主窗口同一套） -->
+        <LinearGradientBrush x:Key="HeaderGradientBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#0E9A8B" Offset="0" />
+            <GradientStop Color="#0B7D8A" Offset="0.55" />
+            <GradientStop Color="#14557A" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="PrimaryGradientBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#0E9A8B" Offset="0" />
+            <GradientStop Color="#14557A" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="PrimaryHoverGradientBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#0B8A7B" Offset="0" />
+            <GradientStop Color="#0F4A68" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="PrimaryPressedGradientBrush" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#09685E" Offset="0" />
+            <GradientStop Color="#0D3F5C" Offset="1" />
+        </LinearGradientBrush>
+
+        <ControlTemplate x:Key="CleanButtonTemplate" TargetType="Button">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="6">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonHoverBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource ButtonPressedBrush}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="PrimaryButtonTemplate" TargetType="Button">
+            <Border Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="6">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="6" ShadowDepth="1" Direction="270"
+                                      Opacity="0.25" Color="#14557A" />
+                </Border.Effect>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryHoverGradientBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryHoverGradientBrush}" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{StaticResource PrimaryPressedGradientBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource PrimaryPressedGradientBrush}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <Style x:Key="CleanButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource CardBackground}" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="MinWidth" Value="96" />
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template" Value="{StaticResource CleanButtonTemplate}" />
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource CleanButton}">
+            <Setter Property="Background" Value="{StaticResource PrimaryGradientBrush}" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryGradientBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Template" Value="{StaticResource PrimaryButtonTemplate}" />
+        </Style>
+
+        <!-- 输入框和下拉框：白底、跟按钮同高、细边框 -->
+        <Style TargetType="TextBox">
+            <Setter Property="MinHeight" Value="30" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="{StaticResource CardBackground}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="MinHeight" Value="32" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Background" Value="{StaticResource CardBackground}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}" />
+        </Style>
+        <!-- 复选框：统一字号和颜色 -->
+        <Style TargetType="CheckBox">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+        </Style>
+    </Window.Resources>
     <ScrollViewer Margin="20">
         <StackPanel>
-            <TextBlock FontSize="16" FontWeight="Bold" Text="设置" />
+            <!-- 渐变标题带：和主窗口同一套，白字“设置” -->
+            <Border Background="{StaticResource HeaderGradientBrush}"
+                    Margin="-20,-20,-20,0" Padding="20,16,20,14" CornerRadius="0,0,12,12">
+                <TextBlock FontSize="20" FontWeight="Bold" Foreground="#FFFFFF" Text="设置" />
+            </Border>
 
-            <TextBlock Margin="0,14,0,0" Text="保存路径（截图和录屏都存到这里，默认是桌面）" />
+            <TextBlock Margin="0,16,0,0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="保存路径（截图和录屏都存到这里，默认是桌面）" />
             <StackPanel Orientation="Horizontal">
                 <TextBox x:Name="SaveFolderBox" Width="340" IsReadOnly="True" />
-                <Button Content="浏览…" Click="OnBrowseClick" />
+                <Button Style="{StaticResource CleanButton}" Margin="8,0,0,0" Content="浏览…" Click="OnBrowseClick" />
             </StackPanel>
 
-            <TextBlock Margin="0,14,0,0" Text="录屏画质" />
+            <TextBlock Margin="0,14,0,0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="录屏画质" />
             <ComboBox x:Name="QualityBox" SelectedIndex="0">
                 <ComboBoxItem Content="高清近无损（H.264 CRF 16，默认）" />
                 <ComboBoxItem Content="真无损（FFV1 / MKV，文件很大）" />
             </ComboBox>
-            <TextBlock Foreground="Gray" TextWrapping="Wrap"
+            <TextBlock Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
                        Text="真无损不是“更清楚一点”，是“一帧都不丢”，文件会大几倍到十几倍。录之前程序会先提示大概占多少空间。" />
 
-            <TextBlock Margin="0,14,0,0" Text="帧率" />
+            <TextBlock Margin="0,14,0,0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="帧率" />
             <ComboBox x:Name="FrameRateBox" SelectedIndex="0">
                 <ComboBoxItem Content="30 帧/秒（默认，够用又省空间）" />
                 <ComboBoxItem Content="60 帧/秒（更顺滑，文件更大）" />
             </ComboBox>
 
+            <TextBlock Margin="0,14,0,0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="录屏分辨率" />
+            <ComboBox x:Name="ResolutionBox" SelectedIndex="0">
+                <ComboBoxItem Content="原画（跟屏幕一样，默认）" />
+                <ComboBoxItem Content="1080p（1920×1080）" />
+                <ComboBoxItem Content="720p（1280×720）" />
+            </ComboBox>
+            <TextBlock Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
+                       Text="选 1080p / 720p 会把画面缩小再存，文件更小，画质略降；画面本来就比它矮时不放大。截图不受这个影响，永远是原画。" />
+
             <CheckBox x:Name="ShowCursorBox" Margin="0,14,0,0" Content="录屏时录上鼠标光标" IsChecked="True" />
             <CheckBox x:Name="CopyShotBox" Content="截图后自动复制到剪贴板" IsChecked="True" />
 
-            <TextBlock Margin="0,14,0,0" Text="声音：只录系统声，不录麦克风（立项时定死的，这里改不了）" Foreground="Gray" />
+            <TextBlock Margin="0,14,0,0" Text="声音：主窗口可以开关系统声；麦克风不录（立项时定死的，没有这个开关）" Foreground="{StaticResource TextMutedBrush}" FontSize="12" />
 
-            <TextBlock Margin="0,14,0,0" FontWeight="Bold" Text="快捷键（点一下框，按新组合键即可改）" />
-            <TextBlock Foreground="Gray" TextWrapping="Wrap"
-                       Text="写法像 Ctrl+Shift+S。如果改完按了没反应，一般是被微信、QQ 或别的软件占了，换个组合再试。" />
+            <TextBlock Margin="0,14,0,0" FontWeight="Bold" Foreground="{StaticResource DeepBlueBrush}" Text="快捷键（点一下框，按新组合键即可改）" />
+            <TextBlock Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
+                       Text="写法像 Ctrl+Alt+S。如果改完按了没反应，一般是被微信、QQ 或别的软件占了，换个组合再试。" />
             <Grid Margin="0,8,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="140" />
@@ -48,22 +181,34 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="区域截图" VerticalAlignment="Center" />
-                <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeyRegionBox" Margin="0,0,0,6" />
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="全屏截图" VerticalAlignment="Center" />
-                <TextBox Grid.Row="1" Grid.Column="1" x:Name="HotkeyFullscreenBox" Margin="0,0,0,6" />
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="开始 / 停止录屏" VerticalAlignment="Center" />
-                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyRecordBox" Margin="0,0,0,6" />
-                <TextBlock Grid.Row="3" Grid.Column="0" Text="暂停 / 继续" VerticalAlignment="Center" />
-                <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Margin="0,0,0,6" />
+                <TextBlock Grid.Row="0" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="区域截图" VerticalAlignment="Center" />
+                <TextBox Grid.Row="0" Grid.Column="1" x:Name="HotkeyRegionBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBlock Grid.Row="1" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="全屏截图" VerticalAlignment="Center" />
+                <TextBox Grid.Row="1" Grid.Column="1" x:Name="HotkeyFullscreenBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBlock Grid.Row="2" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="开始 / 停止录屏" VerticalAlignment="Center" />
+                <TextBox Grid.Row="2" Grid.Column="1" x:Name="HotkeyRecordBox" Margin="0,0,0,6" FontFamily="Consolas" />
+                <TextBlock Grid.Row="3" Grid.Column="0" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" Text="暂停 / 继续" VerticalAlignment="Center" />
+                <TextBox Grid.Row="3" Grid.Column="1" x:Name="HotkeyPauseBox" Margin="0,0,0,6" FontFamily="Consolas" />
             </Grid>
 
-            <TextBlock Margin="0,14,0,0" Foreground="Gray" TextWrapping="Wrap"
+            <TextBlock Margin="0,14,0,0" Foreground="{StaticResource TextMutedBrush}" FontSize="12" TextWrapping="Wrap"
                        Text="没有开机自启开关：立项时定死开机不自启。想用的时候双击打开就行，用完点托盘菜单退出。" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
-                <Button Content="保存" Click="OnSaveClick" />
-                <Button Content="取消" Click="OnCancelClick" />
+                <Button Style="{StaticResource PrimaryButton}" Click="OnSaveClick">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE74E;" FontSize="14"
+                                   Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="保存" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource CleanButton}" Click="OnCancelClick">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE711;" FontSize="14"
+                                   Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="取消" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
