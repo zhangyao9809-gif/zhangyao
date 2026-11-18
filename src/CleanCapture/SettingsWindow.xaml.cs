@@ -23,6 +23,7 @@ public partial class SettingsWindow : Window
         SaveFolderBox.Text = _settings.SaveFolder;
         QualityBox.SelectedIndex = _settings.Quality == RecordingQuality.Lossless ? 1 : 0;
         FrameRateBox.SelectedIndex = _settings.FrameRate == 60 ? 1 : 0;
+        ResolutionBox.SelectedIndex = (int)_settings.Resolution;
         ShowCursorBox.IsChecked = _settings.ShowCursor;
         CopyShotBox.IsChecked = _settings.CopyScreenshotToClipboard;
         HotkeyRegionBox.Text = _settings.HotkeyRegionScreenshot;
@@ -60,7 +61,7 @@ public partial class SettingsWindow : Window
             if (!HotkeyService.TryParse(text, out _, out _))
             {
                 System.Windows.MessageBox.Show(
-                    $"“{name}”的快捷键“{text}”写错了，请改成像 Ctrl+Shift+S 这样的写法。",
+                    $"“{name}”的快捷键“{text}”写错了，请改成像 Ctrl+Alt+S 这样的写法。",
                     "CleanCapture：快捷键写错了",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -71,6 +72,7 @@ public partial class SettingsWindow : Window
         _settings.SaveFolder = SaveFolderBox.Text;
         _settings.Quality = QualityBox.SelectedIndex == 1 ? RecordingQuality.Lossless : RecordingQuality.High;
         _settings.FrameRate = FrameRateBox.SelectedIndex == 1 ? 60 : 30;
+        _settings.Resolution = (RecordingResolution)ResolutionBox.SelectedIndex;
         _settings.ShowCursor = ShowCursorBox.IsChecked == true;
         _settings.CopyScreenshotToClipboard = CopyShotBox.IsChecked == true;
         _settings.HotkeyRegionScreenshot = HotkeyRegionBox.Text.Trim();
