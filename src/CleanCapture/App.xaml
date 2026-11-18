@@ -20,6 +20,12 @@
             <FontFamily x:Key="AppFontFamily">pack://application:,,,/Fonts/#HarmonyOS Sans SC, Microsoft YaHei UI, Segoe UI</FontFamily>
             <FontFamily x:Key="TitleFontFamily">pack://application:,,,/Fonts/#Poppins</FontFamily>
             <!--
+              键帽专用：Poppins Medium 在字体文件里是独立的字体名（"Poppins Medium"），
+              不是 Poppins 字体下的一个字重，所以 FontWeight="Medium" 写在 Poppins 上是找不到的，
+              会回落成 Regular。这里直接指名 "Poppins Medium" 这个字体。
+            -->
+            <FontFamily x:Key="KeycapFontFamily">pack://application:,,,/Fonts/#Poppins Medium</FontFamily>
+            <!--
               页面底色必须放这里（App 级资源），不能只放在某个窗口自己的 Resources 里：
               窗口标签自己的属性（比如 Background="{StaticResource PageBackground}"）
               是在 Window.Resources 加载之前就求值的，写在窗口里它找不到，
