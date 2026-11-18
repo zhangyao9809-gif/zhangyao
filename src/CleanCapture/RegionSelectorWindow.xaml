@@ -1,0 +1,27 @@
+<Window x:Class="CleanCapture.RegionSelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="框选区域"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#33000000"
+        Topmost="True"
+        ShowInTaskbar="False"
+        WindowState="Maximized">
+    <!--
+      全屏半透明遮罩：鼠标按住拖出一个框，松开就是要截 / 要录的区域。
+      按 Esc 取消。框选的矩形会换算成真实像素交给截图 / 录屏模块。
+    -->
+    <Canvas x:Name="RootCanvas" Background="Transparent">
+        <Rectangle x:Name="SelectionRect"
+                   Stroke="Red" StrokeThickness="2"
+                   Fill="#33FF0000" Visibility="Collapsed" />
+        <TextBlock x:Name="HintText"
+                   Foreground="White" FontSize="16"
+                   Text="按住鼠标左键拖出区域，松开确认；按 Esc 取消"
+                   Canvas.Left="20" Canvas.Top="20" />
+        <TextBlock x:Name="SizeText"
+                   Foreground="White" FontSize="14"
+                   Visibility="Collapsed" />
+    </Canvas>
+</Window>
