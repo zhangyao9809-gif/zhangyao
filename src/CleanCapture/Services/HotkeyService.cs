@@ -35,7 +35,7 @@ public sealed class HotkeyService : IDisposable
     public void RegisterAll(AppSettings settings)
     {
         // MainWindow 建好之后才有窗口句柄，这里先等主窗口出来。
-        var mainWindow = Application.Current?.MainWindow;
+        var mainWindow = System.Windows.Application.Current?.MainWindow;
         if (mainWindow == null)
         {
             return;
@@ -55,7 +55,7 @@ public sealed class HotkeyService : IDisposable
     {
         if (!TryParse(hotkeyText, out var modifiers, out var key))
         {
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"快捷键“{hotkeyText}”写错了，{actionName} 这次没注册上。\n请去设置里改成像 Ctrl+Shift+S 这样的写法。",
                 "CleanCapture：快捷键写错了",
                 MessageBoxButton.OK,
@@ -63,12 +63,12 @@ public sealed class HotkeyService : IDisposable
             return;
         }
 
-        var handle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+        var handle = new WindowInteropHelper(System.Windows.Application.Current.MainWindow).Handle;
         var ok = NativeMethods.RegisterHotKey(handle, id, modifiers, key);
         if (!ok)
         {
             var error = Marshal.GetLastWin32Error();
-            MessageBox.Show(
+            System.Windows.MessageBox.Show(
                 $"快捷键“{hotkeyText}”注册失败（错误码 {error}），很可能被别的软件占了。\n" +
                 "请去设置里换一个组合键，比如把 Ctrl+Shift+S 换成 Ctrl+Alt+S。",
                 "CleanCapture：快捷键被占了",
@@ -173,7 +173,7 @@ public sealed class HotkeyService : IDisposable
             return;
         }
 
-        var handle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+        var handle = new WindowInteropHelper(System.Windows.Application.Current.MainWindow).Handle;
         foreach (var id in _actions.Keys)
         {
             NativeMethods.UnregisterHotKey(handle, id);
